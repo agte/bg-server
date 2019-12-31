@@ -1,0 +1,2 @@
+# bg-server
+Minimal server
