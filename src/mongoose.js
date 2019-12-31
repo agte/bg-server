@@ -4,7 +4,12 @@ const logger = require('./logger');
 module.exports = function (app) {
   mongoose.connect(
     app.get('mongodb'),
-    { useCreateIndex: true, useNewUrlParser: true, useUnifiedTopology: true },
+    {
+      useCreateIndex: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      autoIndex: app.get('createIndexes'),
+    },
   ).catch((err) => {
     logger.error(err);
     process.exit(1);

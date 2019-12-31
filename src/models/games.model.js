@@ -1,4 +1,4 @@
-// users-model.js - A mongoose model
+// games-model.js - A mongoose model
 //
 // See http://mongoosejs.com/docs/models.html
 // for more of what you can do here.
@@ -6,15 +6,12 @@ module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
 
-  const users = new Schema({
-    email: {
+  const games = new Schema({
+    name: {
       type: String,
-      required: true,
       unique: true,
-      lowercase: true,
+      required: true,
     },
-    password: { type: String },
-    googleId: { type: String },
   }, {
     timestamps: true,
     toJSON: {
@@ -28,5 +25,11 @@ module.exports = function (app) {
     },
   });
 
-  return mongooseClient.model('users', users);
+  // This is necessary to avoid model compilation errors in watch mode
+  // see https://github.com/Automattic/mongoose/issues/1251
+  try {
+    return mongooseClient.model('games');
+  } catch (e) {
+    return mongooseClient.model('games', games);
+  }
 };

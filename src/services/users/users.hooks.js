@@ -1,8 +1,6 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
-
-const {
-  hashPassword, protect,
-} = require('@feathersjs/authentication-local').hooks;
+const { hashPassword, protect } = require('@feathersjs/authentication-local').hooks;
+const toJSON = require('../../hooks/toJSON.js');
 
 module.exports = {
   before: {
@@ -17,9 +15,10 @@ module.exports = {
 
   after: {
     all: [
+      toJSON,
       // Make sure the password field is never sent to the client
       // Always must be the last hook
-      protect('password'),
+      protect('password', 'googleId'),
     ],
     find: [],
     get: [],

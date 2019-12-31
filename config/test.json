@@ -1,3 +1,4 @@
 {
-  "mongodb": "mongodb://localhost:27017/bg-server-test"
+  "mongodb": "mongodb://localhost:27017/bg-server-test",
+  "createIndexes": false
 }

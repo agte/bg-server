@@ -8,6 +8,7 @@
   },
   "authentication": {
     "entity": "user",
+    "entityId": "id",
     "service": "users",
     "secret": "DnfLKRJ7coyitYabk1Md7ruB6gQ=",
     "authStrategies": [
@@ -40,5 +41,6 @@
       }
     }
   },
-  "mongodb": "mongodb://localhost:27017/bg-server"
+  "mongodb": "mongodb://localhost:27017/bg-server",
+  "createIndexes": true
 }
