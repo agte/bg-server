@@ -28,7 +28,7 @@
     "eslint": "eslint src/. test/. --config .eslintrc.json",
     "dev": "nodemon src/",
     "start": "node src/",
-    "mocha": "NODE_ENV=test MONGODB_URI=mongodb://localhost:27017/bg-server-test mocha test/*.test.js --recursive --exit"
+    "mocha": "NODE_ENV=test mocha --recursive --bail --exit ./test/*.test.js ./test/**/*.test.js"
   },
   "dependencies": {
     "@feathersjs/authentication": "^4.3.11",
