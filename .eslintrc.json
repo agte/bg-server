@@ -1,0 +1,15 @@
+{
+  "env": {
+    "es6": true,
+    "node": true,
+    "mocha": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  },
+  "extends": "airbnb-base",
+  "rules": {
+    "func-names": ["off"],
+    "max-len": ["error", 120]
+  }
+}
