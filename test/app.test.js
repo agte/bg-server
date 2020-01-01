@@ -1,6 +1,6 @@
 const assert = require('assert');
 const axios = require('axios');
-const app = require('../src/app');
+const app = require('../src/app.js');
 
 describe('Feathers application', () => {
   let server;

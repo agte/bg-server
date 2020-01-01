@@ -1,5 +1,5 @@
 const assert = require('assert');
-const app = require('../../src/app');
+const app = require('../../src/app.js');
 const reset = require('../reset.js');
 
 describe('Users', () => {

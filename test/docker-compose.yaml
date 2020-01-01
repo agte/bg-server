@@ -1,0 +1,24 @@
+version: '3.7'
+services:
+  app-test:
+    container_name: app-test
+    build:
+      context: ../
+      dockerfile: ./test/Dockerfile
+    volumes:
+      - ../package.json:/app/package.json
+      - .:/app/test
+    command: yarn test
+    environment:
+      - MONGODB_URI=mongodb://mongodb-test:27017/test
+    depends_on:
+      - mongodb-test
+    networks:
+      - boardgame-test
+  mongodb-test:
+    container_name: mongodb-test
+    image: 'mongo:4.2.2-bionic'
+    networks:
+      - boardgame-test
+networks:
+  boardgame-test:
