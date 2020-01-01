@@ -1,7 +1,5 @@
 {
-  "port": {
-    "__name": "PORT",
-    "__format": "number"
-  },
+  "port": "PORT",
+  "host": "HOST",
   "mongodb": "MONGODB_URI"
 }

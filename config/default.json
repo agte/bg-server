@@ -1,6 +1,6 @@
 {
   "host": "localhost",
-  "port": 3030,
+  "port": 3000,
   "public": "../public/",
   "paginate": {
     "default": 10,
@@ -41,6 +41,6 @@
       }
     }
   },
-  "mongodb": "mongodb://localhost:27017/bg-server",
+  "mongodb": "mongodb://localhost:27017/bg",
   "createIndexes": true
 }

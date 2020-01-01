@@ -1,0 +1,36 @@
+# development config
+version: '3.7'
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - 9999:5000
+    volumes:
+      - ./package.json:/app/package.json
+      - ./yarn.lock:/app/yarn.lock
+      - ./src:/app/src
+      - ./config:/app/config
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      # because feathers use server.listen(port, host)
+      # docker can't map ports correctly when host = "localhost", only when host = "0.0.0.0" or host = "::"
+      # https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback
+      - HOST=0.0.0.0
+      - MONGODB_URI=mongodb://mongodb:27017/dev
+    command: ["yarn", "run", "dev"]
+    depends_on:
+      - mongodb
+    networks:
+      - bg-net
+  mongodb:
+    image: 'mongo:4.2.2-bionic'
+    networks:
+      - bg-net
+    volumes:
+      - mongodb-data:/data/db
+networks:
+  bg-net:
+volumes:
+  mongodb-data:
