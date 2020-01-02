@@ -1,7 +1,7 @@
 // Initializes the `users` service on path `/users`
-const { Users } = require('./users.class');
-const createModel = require('../../models/users.model');
-const hooks = require('./users.hooks');
+const { Users } = require('./users.class.js');
+const createModel = require('./users.model.js');
+const hooks = require('./users.hooks.js');
 
 module.exports = function (app) {
   const options = {

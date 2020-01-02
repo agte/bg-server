@@ -1,7 +1,7 @@
 // Initializes the `games` service on path `/games`
-const { Games } = require('./games.class');
-const createModel = require('../../models/games.model');
-const hooks = require('./games.hooks');
+const { Games } = require('./games.class.js');
+const createModel = require('./games.model.js');
+const hooks = require('./games.hooks.js');
 
 module.exports = function (app) {
   const options = {

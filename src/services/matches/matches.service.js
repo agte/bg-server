@@ -1,7 +1,7 @@
 // Initializes the `matches` service on path `/matches`
-const { Matches } = require('./matches.class');
-const createModel = require('../../models/matches.model');
-const hooks = require('./matches.hooks');
+const { Matches } = require('./matches.class.js');
+const createModel = require('./matches.model.js');
+const hooks = require('./matches.hooks.js');
 
 module.exports = function (app) {
   const options = {
