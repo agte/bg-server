@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-module.exports = (context) => {
+module.exports = () => (context) => {
   if (context.type !== 'after') {
     throw new Error('toJSON hook must be used as an after hook');
   }

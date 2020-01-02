@@ -11,20 +11,15 @@ describe('Authentication', () => {
       password: 'supersecret',
     };
 
-    before(async () => {
-      await app.service('users').create(userInfo);
-    });
+    before(() => app.service('users').create(userInfo));
 
     it('authenticates user and creates accessToken', async () => {
       const { user, accessToken } = await app.service('authentication')
-        .create(
-          { strategy: 'local', ...userInfo },
-          { provider: 'test' },
-        );
+        .create({ strategy: 'local', ...userInfo }, { provider: 'rest' });
       assert.ok(accessToken);
       assert.ok(user.id);
       assert.equal(user.email, userInfo.email);
-      assert.ok(!user.password);
+      assert.ok(!user.password); // when provider === rest
     });
   });
 });

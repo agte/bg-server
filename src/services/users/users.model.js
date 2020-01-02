@@ -1,20 +1,22 @@
-// users-model.js - A mongoose model
-//
-// See http://mongoosejs.com/docs/models.html
-// for more of what you can do here.
-module.exports = function (app) {
+module.exports = function createModel(app) {
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
-
-  const users = new Schema({
+  return mongooseClient.model('users', new Schema({
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
     },
-    password: { type: String },
-    googleId: { type: String },
+    password: {
+      type: String,
+    },
+    googleId: {
+      type: String,
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+    },
   }, {
     timestamps: true,
     toJSON: {
@@ -22,11 +24,9 @@ module.exports = function (app) {
       virtuals: true,
       versionKey: false,
       transform: (doc, ret) => {
-        const { _id, ...result } = ret;
-        return result;
+        const { _id, ...rest } = ret;
+        return rest;
       },
     },
-  });
-
-  return mongooseClient.model('users', users);
+  }));
 };
