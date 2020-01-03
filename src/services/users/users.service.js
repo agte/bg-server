@@ -9,6 +9,7 @@ const validate = require('../../hooks/validate.js');
 const toJSON = require('../../hooks/toJSON.js');
 
 const createSchema = require('./schemas/create.json');
+const patchSchema = require('./schemas/patch.json');
 
 const schema = new Schema({
   roles: {
@@ -26,9 +27,6 @@ const schema = new Schema({
   },
   googleId: {
     type: String,
-  },
-  owner: {
-    type: Schema.Types.ObjectId,
   },
 }, {
   timestamps: true,
@@ -56,7 +54,7 @@ class Users extends Service {
   async removeRole(id, role) {
     const user = await this._get(id);
     if (user.roles.includes(role)) {
-      user.roles = user.roles.filter(item => item !== role);
+      user.roles = user.roles.filter((item) => item !== role);
       await user.save();
     }
     return user.toJSON();
@@ -83,8 +81,8 @@ const hooks = {
     patch: [
       authenticate(),
       checkRoles('admin'),
+      validate(patchSchema),
       addAccessFilter({ ownerField: '_id' }),
-      // validate(patchSchema),
       hashPassword('password'),
     ],
     remove: [

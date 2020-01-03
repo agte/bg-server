@@ -1,5 +1,5 @@
 {
   "mongodb": "mongodb://localhost:27017/bg-test",
   "createIndexes": false,
-  "createAdmin": false,
+  "createAdmin": false
 }

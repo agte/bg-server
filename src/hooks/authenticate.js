@@ -7,6 +7,10 @@ module.exports = () => (context) => {
   }
 
   const { params } = context;
+  if (params.user) {
+    return context;
+  }
+
   if (params.provider && !params.authentication && params.headers && !params.headers.authorization) {
     context.params = {
       ...context.params,

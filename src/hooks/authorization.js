@@ -34,7 +34,12 @@ module.exports = {
   /* eslint-disable-next-line no-unused-vars */
   addAccessFilter: ({ ownerField = 'owner', aclField = 'acl' } = {}) => (context) => {
     const { params: { provider, user } } = context;
+
     if (provider) {
+      if (user && user.roles.includes('admin')) {
+        return context;
+      }
+
       const aclFilterField = context.method === 'find' || context.method === 'get'
         ? `${aclField}.read`
         : `${aclField}.write`;
