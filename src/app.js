@@ -12,12 +12,12 @@ const logger = require('./logger');
 
 const middleware = require('./middleware');
 const services = require('./services');
-const appHooks = require('./app.hooks');
-const channels = require('./channels');
 
-const authentication = require('./authentication');
-
-const mongoose = require('./mongoose');
+const appHooks = require('./app.hooks.js');
+const channels = require('./channels.js');
+const authentication = require('./authentication.js');
+const mongoose = require('./mongoose.js');
+const populate = require('./populate.js');
 
 const app = express(feathers());
 
@@ -55,5 +55,7 @@ app.use(express.notFound());
 app.use(express.errorHandler({ logger }));
 
 app.hooks(appHooks);
+
+populate(app);
 
 module.exports = app;

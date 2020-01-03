@@ -5,7 +5,7 @@ module.exports = () => (context) => {
   }
 
   if (context.method === 'find') {
-    if (context.result.data.length && context.result.data[0].toJSON) {
+    if (context.result.data && context.result.data.length && context.result.data[0].toJSON) {
       context.result.data = context.result.data.map((doc) => doc.toJSON());
     }
   } else if (context.result) {

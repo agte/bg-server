@@ -1,5 +1,9 @@
 {
   "port": "PORT",
   "host": "HOST",
-  "mongodb": "MONGODB_URI"
+  "mongodb": "MONGODB_URI",
+  "admin": {
+    "email": "ADMIN_EMAIL",
+    "password": "ADMIN_PASSWORD"
+  }
 }
