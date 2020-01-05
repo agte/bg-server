@@ -31,7 +31,7 @@ describe('Users', () => {
     }
   });
 
-  it('lists users based', async () => {
+  it('allows a common user to see only himself', async () => {
     const { total, data: readableUsers } = await app.service('users').find({ provider: 'rest', user: userB });
     assert.equal(total, 1);
     assert.equal(readableUsers.length, 1);
@@ -47,25 +47,12 @@ describe('Users', () => {
     }
   });
 
-  it('make an admin from a common user', async () => {
-    await app.service('users/:userId/roles').create({ id: 'admin' }, { route: { userId: userA.id } });
-    const updatedUser = await app.service('users').get(userA.id);
-    assert.equal(updatedUser.roles.toString(), 'admin');
-    userA = updatedUser;
-  });
-
-  it('allows any admin to see all users', async () => {
-    const { total, data: readableUsers } = await app.service('users').find({ provider: 'rest', user: userA });
+  it('allows an admin to see all users', async () => {
+    const { total, data: readableUsers } = await app.service('users').find({
+      provider: 'rest',
+      user: { ...userA, roles: ['admin'] },
+    });
     assert.equal(total, 2);
     assert.equal(readableUsers.length, 2);
-  });
-
-  it('dissalow any admin to change his roles directly', async () => {
-    try {
-      await app.service('users').patch(userA.id, { roles: ['manager'] }, { provider: 'rest', user: userA });
-      assert.fail('Never get here');
-    } catch (e) {
-      assert.equal(e.code, 400); // BadRequest
-    }
   });
 });
