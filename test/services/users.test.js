@@ -3,56 +3,74 @@ const app = require('../../src/app.js');
 const reset = require('../reset.js');
 
 describe('Users', () => {
-  before(() => reset(app));
+  const usersService = app.service('users');
 
   let userA;
   let userB;
 
-  const userAInfo = {
-    email: 'userA@example.com',
-    password: '123456',
-  };
+  before(() => reset(app));
 
-  const userBInfo = {
-    email: 'userB@example.com',
-    password: '7890abc',
-  };
+  describe('Guest user', () => {
+    it('can sign up', async () => {
+      const userAInfo = {
+        email: 'userA@example.com',
+        password: '123456',
+      };
 
-  it('creates new users', async () => {
-    const createdUser = await app.service('users').create(userAInfo, { provider: 'rest' });
-    assert.ok(createdUser.id);
-    assert.equal(createdUser.email, userAInfo.email.toLowerCase());
-    userA = createdUser;
+      const userBInfo = {
+        email: 'userB@example.com',
+        password: '7890abc',
+      };
 
-    try {
-      userB = await app.service('users').create(userBInfo, { provider: 'rest' });
-    } catch (e) {
-      assert.fail('Never get here');
-    }
-  });
+      const createdUser = await usersService.create(userAInfo, { provider: 'rest' });
+      assert.ok(createdUser.id);
+      assert.equal(createdUser.email, userAInfo.email.toLowerCase());
+      userA = createdUser;
 
-  it('allows a common user to see only himself', async () => {
-    const { total, data: readableUsers } = await app.service('users').find({ provider: 'rest', user: userB });
-    assert.equal(total, 1);
-    assert.equal(readableUsers.length, 1);
-    assert.equal(readableUsers[0].id, userB.id);
-  });
-
-  it('dissalow a user to delete himself or anyone', async () => {
-    try {
-      await app.service('users').remove(userA.id, { provider: 'rest', user: userA });
-      assert.fail('Never get here');
-    } catch (e) {
-      assert.equal(e.code, 405); // MethodNotAllow
-    }
-  });
-
-  it('allows an admin to see all users', async () => {
-    const { total, data: readableUsers } = await app.service('users').find({
-      provider: 'rest',
-      user: { ...userA, roles: ['admin'] },
+      userB = await usersService.create(userBInfo, { provider: 'rest' });
     });
-    assert.equal(total, 2);
-    assert.equal(readableUsers.length, 2);
+  });
+
+  describe('Common user', () => {
+    it('can see only himself when listing users', async () => {
+      const { total, data: users } = await usersService.find({ provider: 'rest', user: userB });
+      assert.equal(total, 1);
+      assert.equal(users[0].id, userB.id);
+    });
+  });
+
+  describe('Admin user', () => {
+    const adminRequestOptions = {
+      provider: 'rest',
+      user: { id: '0', roles: ['user', 'admin'] },
+    };
+
+    it('can change anyone\'s password', async () => {
+      await usersService.patch(userA.id, { password: 'ABCDEF' }, adminRequestOptions);
+      assert.ok(true);
+    });
+
+    it('cannot delete another user', async () => {
+      try {
+        await usersService.remove(userA.id, adminRequestOptions);
+        assert.fail('Never get here');
+      } catch (e) {
+        assert.equal(e.code, 405); // MethodNotAllow
+      }
+    });
+
+    it('can see all users', async () => {
+      const { total } = await usersService.find(adminRequestOptions);
+      assert.equal(total, 2);
+    });
+
+    it('cannot change anyone\'s roles directly', async () => {
+      try {
+        await usersService.patch(userA.id, { roles: ['manager'] }, adminRequestOptions);
+        assert.fail('Never get here');
+      } catch (e) {
+        assert.equal(e.code, 400); // BadRequest
+      }
+    });
   });
 });

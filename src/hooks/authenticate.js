@@ -11,13 +11,18 @@ module.exports = () => (context) => {
     return context;
   }
 
-  if (params.provider && !params.authentication && params.headers && !params.headers.authorization) {
-    context.params = {
-      ...context.params,
-      user: {
-        id: '0',
-        roles: ['guest'],
-      },
+  if (!params.provider) {
+    context.params.user = {
+      id: '0',
+      roles: ['system'],
+    };
+    return context;
+  }
+
+  if (params.provider && !params.authentication && (!params.headers || !params.headers.authorization)) {
+    context.params.user = {
+      id: '0',
+      roles: ['guest'],
     };
     return context;
   }

@@ -4,7 +4,6 @@ const { hashPassword, protect } = require('@feathersjs/authentication-local').ho
 const { Service } = require('feathers-mongoose');
 
 const { checkRoles, addAccessFilter } = require('../../hooks/authorization.js');
-const authenticate = require('../../hooks/authenticate.js');
 const validate = require('../../hooks/validate.js');
 const toJSON = require('../../hooks/toJSON.js');
 
@@ -64,14 +63,15 @@ class Users extends Service {
 const hooks = {
   before: {
     find: [
-      authenticate(),
+      checkRoles('user'),
       addAccessFilter({ ownerField: '_id' }),
     ],
     get: [
-      authenticate(),
+      checkRoles('user'),
       addAccessFilter({ ownerField: '_id' }),
     ],
     create: [
+      checkRoles('guest'),
       validate(createSchema),
       hashPassword('password'),
     ],
@@ -79,10 +79,8 @@ const hooks = {
       disallow(),
     ],
     patch: [
-      authenticate(),
       checkRoles('admin'),
       validate(patchSchema),
-      addAccessFilter({ ownerField: '_id' }),
       hashPassword('password'),
     ],
     remove: [
@@ -93,7 +91,7 @@ const hooks = {
   after: {
     all: [
       toJSON(),
-      protect('password', 'googleId'),
+      protect('password'),
     ],
   },
 };

@@ -1,8 +1,9 @@
 const { Forbidden } = require('@feathersjs/errors');
+const authenticate = require('./authenticate.js');
 
 /* eslint-disable no-param-reassign */
 module.exports = {
-  setOwner: () => (context) => {
+  setOwner: () => async (context) => {
     if (context.type !== 'before') {
       throw new Error('setOwner hook must be used as a before hook');
     }
@@ -11,18 +12,39 @@ module.exports = {
       throw new Error('setOwner hook must be used as a create hook');
     }
 
-    if (context.params.user) {
-      context.params.data.owner = context.params.user.id;
+    if (!context.params.provider) {
+      return context;
     }
 
+    if (!context.params.user) {
+      context = await authenticate()(context);
+    }
+
+    context.params.data.owner = context.params.user.id;
     return context;
   },
 
-  checkRoles: (...roles) => (context) => {
+  checkRoles: (...roles) => async (context) => {
+    if (context.type !== 'before') {
+      throw new Error('setOwner hook must be used as a before hook');
+    }
+
+    if (!context.params.provider) {
+      return context;
+    }
+
+    if (!context.params.user) {
+      context = await authenticate()(context);
+    }
+
     const { params: { provider, user } } = context;
 
     if (provider) {
-      if (!user || !user.roles || !user.roles.length || !roles.some((role) => user.roles.includes(role))) {
+      if (user.roles.includes('admin')) {
+        return context;
+      }
+
+      if (!roles.some((role) => user.roles.includes(role))) {
         throw new Forbidden();
       }
     }
@@ -30,13 +52,23 @@ module.exports = {
     return context;
   },
 
-  /* eslint-disable no-param-reassign */
-  /* eslint-disable-next-line no-unused-vars */
-  addAccessFilter: ({ ownerField = 'owner', aclField = 'acl' } = {}) => (context) => {
+  addAccessFilter: ({ ownerField = 'owner', aclField = 'acl' } = {}) => async (context) => {
+    if (context.type !== 'before') {
+      throw new Error('addAccessFilter hook must be used as a before hook');
+    }
+
+    if (!context.params.provider) {
+      return context;
+    }
+
+    if (!context.params.user) {
+      context = await authenticate()(context);
+    }
+
     const { params: { provider, user } } = context;
 
     if (provider) {
-      if (user && user.roles.includes('admin')) {
+      if (user.roles.includes('admin')) {
         return context;
       }
 
@@ -44,25 +76,14 @@ module.exports = {
         ? `${aclField}.read`
         : `${aclField}.write`;
 
-      if (!user) {
-        context.params.query[aclFilterField] = '*';
-      }
-
       if (!context.params.query) {
         context.params.query = {};
       }
 
-      if (user.roles && user.roles.length) {
-        context.params.query.$or = [
-          { [ownerField]: user.id },
-          { [aclFilterField]: { $in: ['*', ...user.roles, user.id] } },
-        ];
-      } else {
-        context.params.query.$or = [
-          { [ownerField]: user.id },
-          { [aclFilterField]: { $in: ['*', user.id] } },
-        ];
-      }
+      context.params.query.$or = [
+        { [ownerField]: user.id },
+        { [aclFilterField]: { $in: ['*', ...user.roles, user.id] } },
+      ];
     }
 
     return context;
