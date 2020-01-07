@@ -20,7 +20,7 @@ module.exports = {
       context = await authenticate()(context);
     }
 
-    context.params.data.owner = context.params.user.id;
+    context.data.owner = context.params.user.id;
     return context;
   },
 
@@ -72,18 +72,35 @@ module.exports = {
         return context;
       }
 
-      const aclFilterField = context.method === 'find' || context.method === 'get'
-        ? `${aclField}.read`
-        : `${aclField}.write`;
+      if (context.method === 'find') {
+        const aclFilterField = context.method === 'find' ? `${aclField}.read` : `${aclField}.write`;
 
-      if (!context.params.query) {
-        context.params.query = {};
+        if (!context.params.query) {
+          context.params.query = {};
+        }
+
+        context.params.query.$or = [
+          { [ownerField]: user.id },
+          { [aclFilterField]: { $in: [...user.roles, user.id] } },
+        ];
+      } else {
+        let allowed = false;
+        const resource = await context.service.get(context.id);
+        if (resource[ownerField] && resource[ownerField] === user.id) {
+          allowed = true;
+        } else if (resource[aclField]) {
+          const acl = context.method === 'get' ? resource[aclField].read : resource[aclField].write;
+          if (acl && acl.length && (acl.includes(user.id) || user.roles.some((role) => acl.includes(role)))) {
+            allowed = true;
+          }
+        }
+        if (!allowed) {
+          throw new Forbidden();
+        }
+        if (context.method === 'get') {
+          context.result = resource;
+        }
       }
-
-      context.params.query.$or = [
-        { [ownerField]: user.id },
-        { [aclFilterField]: { $in: ['*', ...user.roles, user.id] } },
-      ];
     }
 
     return context;

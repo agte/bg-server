@@ -1,7 +1,7 @@
 const { Schema } = require('mongoose');
+const { Service } = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
 const { hashPassword, protect } = require('@feathersjs/authentication-local').hooks;
-const { Service } = require('feathers-mongoose');
 
 const { checkRoles, addAccessFilter } = require('../../hooks/authorization.js');
 const validate = require('../../hooks/validate.js');
@@ -10,7 +10,7 @@ const toJSON = require('../../hooks/toJSON.js');
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
 
-const schema = new Schema({
+const modelSchema = new Schema({
   roles: {
     type: [String],
     default: ['user'],
@@ -33,10 +33,12 @@ const schema = new Schema({
     getters: true,
     virtuals: true,
     versionKey: false,
+    /* eslint-disable no-param-reassign */
     transform: (doc, ret) => {
-      const { _id, ...rest } = ret;
-      return rest;
+      delete ret._id;
+      return ret;
     },
+    /* eslint-enable no-param-reassign */
   },
 });
 
@@ -98,12 +100,10 @@ const hooks = {
 
 module.exports = function (app) {
   const options = {
-    Model: app.get('mongooseClient').model('users', schema),
+    Model: app.get('mongooseClient').model('users', modelSchema),
     paginate: app.get('paginate'),
     lean: false,
   };
   app.use('/users', new Users(options, app));
-
-  const service = app.service('users');
-  service.hooks(hooks);
+  app.service('users').hooks(hooks);
 };
