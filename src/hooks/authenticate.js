@@ -14,8 +14,10 @@ module.exports = () => (context) => {
   if (params.provider && !params.authentication && params.headers && !params.headers.authorization) {
     context.params = {
       ...context.params,
-      authentication: { strategy: 'anonymous' },
-      anonymous: true,
+      user: {
+        id: '0',
+        roles: ['guest'],
+      },
     };
     return context;
   }

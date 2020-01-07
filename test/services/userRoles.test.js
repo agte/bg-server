@@ -14,14 +14,18 @@ describe('userRoles', () => {
     }, { provider: 'rest' });
   });
 
-  it('make an admin from a common user', async () => {
+  it('gives to every registered user a "user" role', () => {
+    assert.equal(userA.roles.toString(), 'user');
+  });
+
+  it('makes an admin from a common user', async () => {
     await app.service('users/:userId/roles').create({ id: 'admin' }, { route: { userId: userA.id } });
     const updatedUser = await app.service('users').get(userA.id);
-    assert.equal(updatedUser.roles.toString(), 'admin');
+    assert.equal(updatedUser.roles.toString(), 'user,admin');
     userA = updatedUser;
   });
 
-  it('dissalow an admin to change his roles directly', async () => {
+  it('dissalowa an admin to change his roles directly', async () => {
     try {
       await app.service('users').patch(userA.id, { roles: ['manager'] }, { provider: 'rest', user: userA });
       assert.fail('Never get here');

@@ -14,7 +14,7 @@ const patchSchema = require('./schemas/patch.json');
 const schema = new Schema({
   roles: {
     type: [String],
-    default: [],
+    default: ['user'],
   },
   email: {
     type: String,
