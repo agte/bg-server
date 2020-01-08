@@ -1,11 +1,10 @@
-const { Schema } = require('mongoose');
+const { Schema, mongo: { ObjectId } } = require('mongoose');
 const { Service } = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
 const { hashPassword, protect } = require('@feathersjs/authentication-local').hooks;
 
-const { checkRoles, addAccessFilter } = require('../../hooks/authorization.js');
+const { checkRoles, addAccessFilter, checkAccess } = require('../../hooks/authorization.js');
 const validate = require('../../hooks/validate.js');
-const toJSON = require('../../hooks/toJSON.js');
 
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
@@ -27,6 +26,10 @@ const modelSchema = new Schema({
   googleId: {
     type: String,
   },
+  owner: {
+    type: Schema.Types.ObjectId,
+    required: true,
+  },
 }, {
   timestamps: true,
   toJSON: {
@@ -43,6 +46,11 @@ const modelSchema = new Schema({
 });
 
 class Users extends Service {
+  async _create(data, params) {
+    const id = new ObjectId();
+    return super._create({ ...data, _id: id, owner: id }, params);
+  }
+
   async addRole(id, role) {
     const user = await this._get(id);
     if (!user.roles.includes(role)) {
@@ -65,12 +73,10 @@ class Users extends Service {
 const hooks = {
   before: {
     find: [
-      checkRoles('user'),
-      addAccessFilter({ ownerField: '_id' }),
+      addAccessFilter(),
     ],
     get: [
-      checkRoles('user'),
-      addAccessFilter({ ownerField: '_id' }),
+      checkAccess(),
     ],
     create: [
       checkRoles('guest'),
@@ -81,7 +87,7 @@ const hooks = {
       disallow(),
     ],
     patch: [
-      checkRoles('admin'),
+      checkAccess(),
       validate(patchSchema),
       hashPassword('password'),
     ],
@@ -92,7 +98,6 @@ const hooks = {
 
   after: {
     all: [
-      toJSON(),
       protect('password'),
     ],
   },

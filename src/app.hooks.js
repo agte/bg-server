@@ -1,3 +1,5 @@
+const toJSON = require('./hooks/toJSON.js');
+
 module.exports = {
   before: {
     all: [],
@@ -10,7 +12,9 @@ module.exports = {
   },
 
   after: {
-    all: [],
+    all: [
+      toJSON(),
+    ],
     find: [],
     get: [],
     create: [],

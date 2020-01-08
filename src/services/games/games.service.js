@@ -1,10 +1,17 @@
 const { Schema } = require('mongoose');
 const { Service } = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
+const { protect } = require('@feathersjs/authentication-local').hooks;
 
-const { checkRoles, addAccessFilter, setOwner } = require('../../hooks/authorization.js');
+const {
+  checkRoles,
+  addAccessFilter,
+  checkAccess,
+  setOwner,
+  setAccessControl,
+  ACLSchema,
+} = require('../../hooks/authorization.js');
 const validate = require('../../hooks/validate.js');
-const toJSON = require('../../hooks/toJSON.js');
 
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
@@ -27,6 +34,7 @@ const modelSchema = new Schema({
     type: Schema.Types.ObjectId,
     required: true,
   },
+  acl: ACLSchema,
 }, {
   timestamps: true,
   toJSON: {
@@ -43,39 +51,37 @@ const modelSchema = new Schema({
   },
 });
 
-const Games = class Games extends Service {
-};
+class Games extends Service {
+}
 
 const hooks = {
   before: {
     find: [
-      checkRoles('user'),
+      addAccessFilter(),
     ],
     get: [
-      checkRoles('user'),
+      checkAccess(),
     ],
     create: [
       checkRoles('designer'),
       validate(createSchema),
       setOwner(),
+      setAccessControl('read', 'user'),
     ],
     update: [
       disallow(),
     ],
     patch: [
-      checkRoles('designer'),
-      addAccessFilter(),
+      checkAccess(),
       validate(patchSchema),
     ],
     remove: [
-      checkRoles('designer'),
-      addAccessFilter(),
+      checkAccess(),
     ],
   },
-
   after: {
     all: [
-      toJSON(),
+      protect('acl'),
     ],
   },
 };
