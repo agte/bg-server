@@ -33,12 +33,12 @@ const modelSchema = new Schema({
 }, {
   timestamps: true,
   toJSON: {
-    getters: true,
-    virtuals: true,
     versionKey: false,
     /* eslint-disable no-param-reassign */
     transform: (doc, ret) => {
+      ret.id = ret._id.toString();
       delete ret._id;
+      ret.owner = ret.owner.toString();
       return ret;
     },
     /* eslint-enable no-param-reassign */
