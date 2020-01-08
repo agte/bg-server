@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "game": {
+      "type": "string"
+    }
+  },
+  "required": ["game"],
+  "additionalProperties": false
+}
