@@ -14,10 +14,6 @@ module.exports = {
       throw new Error('setOwner hook must be used as a create hook');
     }
 
-    if (!context.params.provider) {
-      return context;
-    }
-
     if (!context.params.user) {
       context = await authenticate()(context);
     }

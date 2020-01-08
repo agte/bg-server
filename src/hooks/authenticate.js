@@ -13,7 +13,7 @@ module.exports = () => (context) => {
 
   if (!params.provider) {
     context.params.user = {
-      id: '0',
+      id: '000000000000000000000001',
       roles: ['system'],
     };
     return context;
@@ -21,7 +21,7 @@ module.exports = () => (context) => {
 
   if (params.provider && !params.authentication && (!params.headers || !params.headers.authorization)) {
     context.params.user = {
-      id: '0',
+      id: '000000000000000000000002',
       roles: ['guest'],
     };
     return context;

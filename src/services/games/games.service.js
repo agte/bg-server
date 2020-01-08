@@ -24,10 +24,12 @@ const modelSchema = new Schema({
   },
   minPlayers: {
     type: Number,
+    min: 1,
     default: 1,
   },
   maxPlayers: {
     type: Number,
+    min: 0,
     default: 0,
   },
   owner: {
