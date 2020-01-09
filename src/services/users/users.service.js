@@ -73,9 +73,11 @@ class Users extends Service {
 const hooks = {
   before: {
     find: [
+      checkRoles('user'),
       addAccessFilter(),
     ],
     get: [
+      checkRoles('user'),
       checkAccess(),
     ],
     create: [
