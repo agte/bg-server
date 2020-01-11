@@ -22,7 +22,12 @@ describe('Games', () => {
   describe('Designer', () => {
     it('can create a new game', async () => {
       const game = await gamesService.create(
-        { name: 'Tic-Tac-Toe', minPlayers: 2, maxPlayers: 2 },
+        {
+          name: 'Tic-Tac-Toe',
+          engine: 'tic-tac-toe',
+          minPlayers: 2,
+          maxPlayers: 2,
+        },
         { provider: 'rest', user: designerA },
       );
       assert.ok(game.id);
@@ -43,7 +48,7 @@ describe('Games', () => {
 
     it('cannot patch a game he does not own', async () => {
       gameB = await gamesService.create(
-        { name: 'Chess' },
+        { name: 'Chess', engine: 'chess' },
         { provider: 'rest', user: designerB },
       );
       try {

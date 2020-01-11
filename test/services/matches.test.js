@@ -16,7 +16,7 @@ describe('Matches', () => {
 
   before(async () => {
     await reset(app);
-    game = await gamesService.create({ name: 'Tic-Tac-Toe' });
+    game = await gamesService.create({ name: 'Tic-Tac-Toe', engine: 'tic-tac-toe' });
   });
 
   describe('Draft', () => {

@@ -22,6 +22,10 @@ const modelSchema = new Schema({
     unique: true,
     required: true,
   },
+  engine: {
+    type: String,
+    required: true,
+  },
   minPlayers: {
     type: Number,
     min: 1,

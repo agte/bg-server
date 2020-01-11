@@ -43,7 +43,6 @@
   },
   "mongodb": "mongodb://localhost:27017/bg",
   "createIndexes": true,
-  "createAdmin": true,
   "adminInfo": {
     "email": "example@mail.com",
     "password": "qwerty"

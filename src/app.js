@@ -17,7 +17,6 @@ const appHooks = require('./app.hooks.js');
 const channels = require('./channels.js');
 const authentication = require('./authentication.js');
 const mongoose = require('./mongoose.js');
-const populate = require('./populate.js');
 
 const app = express(feathers());
 
@@ -55,7 +54,5 @@ app.use(express.notFound());
 app.use(express.errorHandler({ logger }));
 
 app.hooks(appHooks);
-
-populate(app);
 
 module.exports = app;
