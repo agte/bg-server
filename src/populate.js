@@ -15,10 +15,10 @@ module.exports = async (app) => {
 
   // Пока захардкодим крестики-нолики.
   // Затем будем задавать массив игр через конфигурационный файл.
-  const { data: [gameTicTacToe] } = await gamesService.find({ query: { name: 'Tic-Tac-Toe' }, limit: 1 });
+  const { data: [gameTicTacToe] } = await gamesService.find({ query: { name: 'Крестики-нолики' }, limit: 1 });
   if (!gameTicTacToe) {
     await gamesService.create({
-      name: 'Tic-Tac-Toe',
+      name: 'Крестики-нолики',
       engine: 'tic-tac-toe',
       minPlayers: 2,
       maxPlayers: 2,
