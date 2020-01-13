@@ -83,7 +83,7 @@ module.exports = {
     return context;
   },
 
-  checkAccess: () => async (context) => {
+  checkAccess: (accessType = '') => async (context) => {
     if (context.type !== 'before') {
       throw new Error('checkAccess hook must be used as a before hook');
     }
@@ -124,7 +124,10 @@ module.exports = {
     }
 
     if (resource.acl) {
-      const acl = context.method === 'get' ? resource.acl.read : resource.acl.write;
+      if (!accessType) {
+        accessType = context.method === 'get' ? 'read' : 'write';
+      }
+      const acl = resource.acl[accessType];
       if (acl && acl.length && (acl.includes(user.id) || user.roles.some((role) => acl.includes(role)))) {
         return context;
       }

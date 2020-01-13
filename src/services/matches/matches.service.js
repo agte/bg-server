@@ -35,8 +35,18 @@ const modelSchema = new Schema({
     index: true,
   },
   players: {
-    type: [Schema.Types.ObjectId],
+    type: [{
+      type: Schema.Types.ObjectId,
+    }],
     default: [],
+  },
+  minPlayers: {
+    type: Number,
+    required: true,
+  },
+  maxPlayers: {
+    type: Number,
+    required: true,
   },
   owner: {
     type: Schema.Types.ObjectId,
@@ -67,13 +77,19 @@ class Matches extends Service {
   }
 
   async _create(data, params) {
+    let game;
     try {
-      await this.games._get(data.game);
+      game = await this.games._get(data.game);
     } catch (e) {
       throw new BadRequest('Specified game does not exist');
     }
     const players = [ObjectId(params.user.id)];
-    return super._create({ ...data, players }, params);
+    return super._create({
+      ...data,
+      players,
+      minPlayers: game.minPlayers,
+      maxPlayers: game.maxPlayers,
+    }, params);
   }
 
   async _patch(id, data, params) {
@@ -90,6 +106,20 @@ class Matches extends Service {
       throw new Forbidden(`You cannot remove a match in "${resource.status}" status`);
     }
     return super._remove(id, params);
+  }
+
+  async addPlayer(id, userId) {
+    const match = await this._get(id);
+    match.players.push(ObjectId(userId));
+    await match.save();
+    return match.toJSON();
+  }
+
+  async removePlayer(id, userId) {
+    const match = await this._get(id);
+    match.players = match.players.filter((playerId) => playerId.toString() !== userId);
+    await match.save();
+    return match.toJSON();
   }
 }
 

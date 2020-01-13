@@ -16,7 +16,12 @@ describe('Matches', () => {
 
   before(async () => {
     await reset(app);
-    game = await gamesService.create({ name: 'Tic-Tac-Toe', engine: 'tic-tac-toe' });
+    game = await gamesService.create({
+      name: 'Tic-Tac-Toe',
+      engine: 'tic-tac-toe',
+      minPlayers: 2,
+      maxPlayers: 2,
+    });
   });
 
   describe('Draft', () => {
@@ -25,7 +30,8 @@ describe('Matches', () => {
       assert.equal(match.game, game.id);
       assert.equal(match.status, 'draft');
       assert.equal(match.owner, userA.id);
-      // matchA = match;
+      assert.equal(match.minPlayers, game.minPlayers);
+      assert.equal(match.maxPlayers, game.maxPlayers);
     });
 
     it('should check if specified game exists', async () => {

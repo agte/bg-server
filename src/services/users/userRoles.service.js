@@ -1,4 +1,4 @@
-const { BadRequest, NotFound } = require('@feathersjs/errors');
+const { Conflict, NotFound } = require('@feathersjs/errors');
 const { checkAccess, checkRoles } = require('../../hooks/authorization.js');
 const validate = require('../../hooks/validate.js');
 const createRoleSchema = require('./schemas/createRole.json');
@@ -10,27 +10,27 @@ class UserRoles {
   }
 
   async find({ route }) {
-    const user = await this.users._get(route.pid);
-    return user.roles.map((role) => ({ id: role }));
+    const userDoc = await this.users._get(route.pid);
+    return userDoc.roles.map((role) => ({ id: role }));
   }
 
   async create({ id }, { route }) {
-    const user = await this.users._get(route.pid);
-    if (user.roles.includes(id)) {
-      throw new BadRequest('Duplicate id');
+    const userDoc = await this.users._get(route.pid);
+    if (userDoc.roles.includes(id)) {
+      throw new Conflict('Duplicate role');
     }
-    user.roles.push(id);
-    await user.save();
+    userDoc.roles.push(id);
+    await userDoc.save();
     return { id };
   }
 
   async remove(id, { route }) {
-    const user = await this.users._get(route.pid);
-    if (!user.roles.includes(id)) {
-      throw new NotFound();
+    const userDoc = await this.users._get(route.pid);
+    if (!userDoc.roles.includes(id)) {
+      throw new NotFound('Role not found');
     }
-    user.roles.pull(id);
-    await user.save();
+    userDoc.roles.pull(id);
+    await userDoc.save();
     return { id };
   }
 }
