@@ -1,7 +1,6 @@
 const { Schema, mongo: { ObjectId } } = require('mongoose');
 const { Forbidden } = require('@feathersjs/errors');
 const authenticate = require('./authenticate.js');
-const getResource = require('./getResource.js');
 
 /* eslint-disable no-param-reassign */
 module.exports = {
@@ -89,26 +88,36 @@ module.exports = {
       throw new Error('checkAccess hook must be used as a before hook');
     }
 
-    if (!context.id) {
+    let { service, id } = context;
+
+    if (context.service.options.parent) {
+      service = context.app.service(context.service.options.parent);
+      if (!service) {
+        throw new Error('Unknown parent service');
+      }
+      id = context.params.route.pid;
+    }
+
+    if (!id) {
       throw new Error('checkAccess hook must be used only in methods which works with id');
     }
+
+    let { params: { user } } = context;
 
     if (!context.params.provider) {
       return context;
     }
 
-    if (!context.params.user) {
+    if (!user) {
       context = await authenticate()(context);
+      user = context.params.user;
     }
-
-    const { params: { user } } = context;
 
     if (user.roles.includes('admin')) {
       return context;
     }
 
-    context = await getResource()(context);
-    const { resource } = context.params;
+    const resource = await service.get(id);
 
     if (resource.owner && resource.owner === user.id) {
       return context;

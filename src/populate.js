@@ -3,7 +3,7 @@ const logger = require('./logger');
 module.exports = async (app) => {
   logger.info('Start populating the database...');
   const usersService = app.service('users');
-  const userRolesService = app.service('users/:userId/roles');
+  const userRolesService = app.service('users/:pid/roles');
 
   let { data: [admin] } = await usersService.find({ query: { roles: 'admin' }, limit: 1 });
   if (!admin) {
