@@ -1,4 +1,3 @@
-const authenticate = require('../../hooks/authenticate.js');
 const { checkRoles } = require('../../hooks/authorization.js');
 const validate = require('../../hooks/validate.js');
 const createRoleSchema = require('./schemas/createRole.json');
@@ -28,7 +27,6 @@ class UserRoles {
 const hooks = {
   before: {
     all: [
-      authenticate(),
       checkRoles('admin'),
     ],
     create: [

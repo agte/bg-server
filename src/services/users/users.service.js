@@ -14,6 +14,13 @@ const modelSchema = new Schema({
     type: [String],
     default: ['user'],
   },
+  name: {
+    type: String,
+    minlength: 2,
+    maxlength: 25,
+    required: true,
+    unique: true,
+  },
   email: {
     type: String,
     required: true,

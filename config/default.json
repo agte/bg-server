@@ -44,6 +44,7 @@
   "mongodb": "mongodb://localhost:27017/bg",
   "createIndexes": true,
   "adminInfo": {
+    "name": "admin",
     "email": "example@mail.com",
     "password": "qwerty"
   }

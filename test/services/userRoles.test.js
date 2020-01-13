@@ -12,7 +12,11 @@ describe('User roles', () => {
 
   describe('Default roles', () => {
     it('every user should get role "user"', async () => {
-      userA = await usersService.create({ email: 'userA@example.com', password: '123456' });
+      userA = await usersService.create({
+        name: 'AAA',
+        email: 'userA@example.com',
+        password: '123456',
+      });
       assert.equal(userA.roles.toString(), 'user');
     });
   });

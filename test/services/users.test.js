@@ -13,11 +13,13 @@ describe('Users', () => {
   describe('Guest user', () => {
     it('can sign up', async () => {
       const userAInfo = {
+        name: 'AAA',
         email: 'userA@example.com',
         password: '123456',
       };
 
       const userBInfo = {
+        name: 'BBB',
         email: 'userB@example.com',
         password: '7890abc',
       };
