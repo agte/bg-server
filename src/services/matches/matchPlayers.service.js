@@ -3,12 +3,13 @@ const { checkAccess } = require('../../hooks/authorization.js');
 const validate = require('../../hooks/validate.js');
 const addPlayerSchema = require('./schemas/addPlayer.json');
 
-const cutUser = (user) => ({ id: user.id, name: user.name });
+const playerInfo = (user) => ({ id: user.id, name: user.name });
 
 class MatchPlayers {
   constructor(options, app) {
     this.options = options || {};
     this.matches = app.service('matches');
+    this.matchStatus = app.service('matches/:pid/status');
     this.users = app.service('users');
   }
 
@@ -17,14 +18,22 @@ class MatchPlayers {
     if (!matchDoc.players.length) {
       return [];
     }
-    const { data: players } = await this.users._find({ query: { _id: { $in: matchDoc.players } } });
-    const playersMap = new Map(players.map((player) => [player.id, cutUser(player)]));
+    const { data: players } = await this.users._find({
+      query: { _id: { $in: matchDoc.players } },
+    });
+    const playersMap = new Map(
+      players.map((player) => [player.id, playerInfo(player)]),
+    );
     return matchDoc.players.map((_id) => playersMap.get(_id.toString()));
   }
 
-  // join the game (only by itself)
+  // join the game (only itself)
   async create(data, { route, user }) {
     const matchDoc = await this.matches._get(route.pid);
+
+    if (matchDoc.status !== 'gathering') {
+      throw new Conflict('Joining a match is not allowed now');
+    }
 
     if (matchDoc.maxPlayers === matchDoc.players.length) {
       throw new Conflict('Maximum number of players reached');
@@ -36,19 +45,33 @@ class MatchPlayers {
 
     matchDoc.players.push(user.id);
     await matchDoc.save();
-    return cutUser(user);
+    return playerInfo(user);
   }
 
   // leave the game (any player) or pull someone out from the game (allowed only to admins)
   async remove(id, { route, user }) {
     const matchDoc = await this.matches._get(route.pid);
-    if (user.id !== id && user.id !== matchDoc.owner.toString()) {
-      throw new Forbidden('You can delete only yourself from the game');
+
+    if (matchDoc.status !== 'gathering') {
+      throw new Conflict('Leaving a match is not allowed now');
     }
+
+    if (user.id === matchDoc.owner.toString()) {
+      if (user.id === id) {
+        throw new Forbidden('You cannot delete owner of the match');
+      }
+    } else {
+      if (user.id !== id) { // eslint-disable-line no-lonely-if
+        throw new Forbidden('You cannot delete anyone except yourself from the match');
+      }
+    }
+
     if (!matchDoc.players.some((_id) => _id.toString() === id)) {
       throw new NotFound('Player not found');
     }
-    await matchDoc.players.pull(id);
+
+    matchDoc.players.pull(id);
+    await matchDoc.save();
     return { id };
   }
 }

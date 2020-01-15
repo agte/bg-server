@@ -1,7 +1,7 @@
 const { Schema, mongo: { ObjectId } } = require('mongoose');
 const { Service } = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
-const { BadRequest, Forbidden } = require('@feathersjs/errors');
+const { BadRequest, Conflict } = require('@feathersjs/errors');
 const { protect } = require('@feathersjs/authentication-local').hooks;
 
 const {
@@ -30,6 +30,7 @@ const modelSchema = new Schema({
       'pending',
       'launched',
       'finished',
+      'aborted',
     ],
     default: 'draft',
     index: true,
@@ -73,13 +74,13 @@ const modelSchema = new Schema({
 class Matches extends Service {
   constructor(options, app) {
     super(options, app);
-    this.games = app.service('games');
+    this.Game = app.service('games');
   }
 
   async _create(data, params) {
     let game;
     try {
-      game = await this.games._get(data.game);
+      game = await this.Game._get(data.game);
     } catch (e) {
       throw new BadRequest('Specified game does not exist');
     }
@@ -95,7 +96,7 @@ class Matches extends Service {
   async _patch(id, data, params) {
     const resource = params.resource || await this.get(id);
     if (resource.status !== 'draft') {
-      throw new Forbidden(`You cannot update a match in "${resource.status}" status`);
+      throw new Conflict(`You cannot update a match in "${resource.status}" status`);
     }
     return super._patch(id, data, params);
   }
@@ -103,7 +104,7 @@ class Matches extends Service {
   async _remove(id, params) {
     const resource = params.resource || await this.get(id);
     if (resource.status === 'launched' || resource.status === 'finished') {
-      throw new Forbidden(`You cannot remove a match in "${resource.status}" status`);
+      throw new Conflict(`You cannot remove a match in "${resource.status}" status`);
     }
     return super._remove(id, params);
   }

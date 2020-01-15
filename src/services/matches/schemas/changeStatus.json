@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "value": {
+      "type": "string",
+      "enum": [
+        "gathering",
+        "pending",
+        "launched",
+        "aborted"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

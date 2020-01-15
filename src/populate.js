@@ -5,10 +5,10 @@ module.exports = async (app) => {
   const usersService = app.service('users');
   const userRolesService = app.service('users/:pid/roles');
 
-  let { data: [admin] } = await usersService.find({ query: { roles: 'admin' }, limit: 1 });
+  let { data: [admin] } = await usersService.find({ query: { roles: 'admin', $limit: 1 } });
   if (!admin) {
     admin = await usersService.create(app.get('adminInfo'));
-    await userRolesService.create({ id: 'admin' }, { route: { userId: admin.id } });
+    await userRolesService.create({ id: 'admin' }, { route: { pid: admin.id } });
   }
 
   const gamesService = app.service('games');
