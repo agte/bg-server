@@ -164,5 +164,6 @@ module.exports = function (app) {
     lean: false,
   };
   app.use('/matches', new Matches(options, app));
-  app.service('matches').hooks(hooks);
+  const service = app.service('matches')
+  service.hooks(hooks);
 };
