@@ -1,6 +1,5 @@
 const { Schema } = require('mongoose');
 
-/* eslint-disable no-param-reassign */
 module.exports = new Schema({
   read: {
     type: [String],

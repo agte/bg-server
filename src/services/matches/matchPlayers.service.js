@@ -5,8 +5,6 @@ const validate = require('../../hooks/validate.js');
 
 const addPlayerSchema = require('./schemas/addPlayer.json');
 
-const playerInfo = (user) => ({ id: user.id, name: user.name });
-
 class MatchPlayers {
   constructor(options, app) {
     this.options = options || {};
@@ -14,25 +12,12 @@ class MatchPlayers {
     this.User = app.service('users');
   }
 
-  async find({ route }) {
-    const matchDoc = await this.Match._get(route.pid);
-    if (!matchDoc.players.length) {
-      return [];
-    }
-    const { data: players } = await this.User._find({
-      query: { _id: { $in: matchDoc.players } },
-    });
-    const playersMap = new Map(
-      players.map((player) => [player.id, playerInfo(player)]),
-    );
-    return matchDoc.players.map((_id) => playersMap.get(_id.toString()));
-  }
-
   // join the game (only itself)
   async create(data, { route, user }) {
     const matchDoc = await this.Match._get(route.pid);
+    const isOwner = user.id === matchDoc.owner.toString();
 
-    if (matchDoc.status !== 'gathering') {
+    if (matchDoc.status !== 'gathering' && !(isOwner && matchDoc.status === 'draft')) {
       throw new Conflict('Joining a match is not allowed now');
     }
 
@@ -40,40 +25,36 @@ class MatchPlayers {
       throw new Conflict('Maximum number of players reached');
     }
 
-    if (matchDoc.players.some((_id) => _id.toString() === user.id)) {
+    if (matchDoc.players.id(user.id)) {
       throw new Conflict('Duplicate player');
     }
 
-    matchDoc.players.push(user.id);
+    matchDoc.players.push({ _id: user.id, name: user.name });
     await matchDoc.save();
 
     this.Match.emit('patched', matchDoc.toJSON());
-    return playerInfo(user);
+    return matchDoc.players[matchDoc.players.length - 1];
   }
 
   // leave the game (any player) or pull someone out from the game (allowed only to admins)
   async remove(id, { route, user }) {
     const matchDoc = await this.Match._get(route.pid);
+    const isOwner = user.id === matchDoc.owner.toString();
 
-    if (matchDoc.status !== 'gathering') {
+    if (matchDoc.status !== 'gathering' && !(isOwner && matchDoc.status === 'draft')) {
       throw new Conflict('Leaving a match is not allowed now');
     }
 
-    if (user.id === matchDoc.owner.toString()) {
-      if (user.id === id) {
-        throw new Forbidden('You cannot delete owner of the match');
-      }
-    } else {
-      if (user.id !== id) { // eslint-disable-line no-lonely-if
-        throw new Forbidden('You cannot delete anyone except yourself from the match');
-      }
+    if (user.id === matchDoc.owner.toString() && user.id !== id) {
+      throw new Forbidden('You cannot delete anyone except yourself from the match');
     }
 
-    if (!matchDoc.players.some((_id) => _id.toString() === id)) {
+    const player = matchDoc.players.id(id);
+    if (!player) {
       throw new NotFound('Player not found');
     }
 
-    matchDoc.players.pull(id);
+    player.remove();
     await matchDoc.save();
 
     this.Match.emit('patched', matchDoc.toJSON());

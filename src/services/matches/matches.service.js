@@ -2,7 +2,7 @@ const { disallow } = require('feathers-hooks-common');
 const { protect } = require('@feathersjs/authentication-local').hooks;
 const { BadRequest, Conflict } = require('@feathersjs/errors');
 const { Service } = require('feathers-mongoose');
-const { Schema, mongo: { ObjectId } } = require('mongoose');
+const { Schema } = require('mongoose');
 
 const addAccessFilter = require('../../hooks/authorization/addAccessFilter.js');
 const checkAccess = require('../../hooks/authorization/checkAccess.js');
@@ -11,11 +11,33 @@ const setAccessControl = require('../../hooks/authorization/setAccessControl.js'
 const setOwner = require('../../hooks/authorization/setOwner.js');
 const validate = require('../../hooks/validate.js');
 
-const ACLSchema = require('../../mongoose/ACLSchema.js');
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
 
-const modelSchema = new Schema({
+const ACLSchema = require('../../mongoose/ACLSchema.js');
+
+const PlayerSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+}, {
+  _id: true,
+  id: true,
+  timestamps: false,
+  toJSON: {
+    versionKey: false,
+    /* eslint-disable no-param-reassign */
+    transform: (doc, ret) => {
+      ret.id = ret._id.toString();
+      delete ret._id;
+      return ret;
+    },
+    /* eslint-enable no-param-reassign */
+  },
+});
+
+const MatchSchema = new Schema({
   game: {
     type: Schema.Types.ObjectId,
     required: true,
@@ -34,9 +56,7 @@ const modelSchema = new Schema({
     index: true,
   },
   players: {
-    type: [{
-      type: Schema.Types.ObjectId,
-    }],
+    type: [PlayerSchema],
     default: [],
   },
   minPlayers: {
@@ -62,7 +82,6 @@ const modelSchema = new Schema({
       delete ret._id;
       ret.game = ret.game.toString();
       ret.owner = ret.owner.toString();
-      ret.players = ret.players.map((player) => player.toString());
       return ret;
     },
     /* eslint-enable no-param-reassign */
@@ -82,10 +101,8 @@ class Matches extends Service {
     } catch (e) {
       throw new BadRequest('Specified game does not exist');
     }
-    const players = [ObjectId(params.user.id)];
     return super._create({
       ...data,
-      players,
       minPlayers: game.minPlayers,
       maxPlayers: game.maxPlayers,
     }, params);
@@ -105,20 +122,6 @@ class Matches extends Service {
       throw new Conflict(`You cannot remove a match in "${resource.status}" status`);
     }
     return super._remove(id, params);
-  }
-
-  async addPlayer(id, userId) {
-    const match = await this._get(id);
-    match.players.push(ObjectId(userId));
-    await match.save();
-    return match.toJSON();
-  }
-
-  async removePlayer(id, userId) {
-    const match = await this._get(id);
-    match.players = match.players.filter((playerId) => playerId.toString() !== userId);
-    await match.save();
-    return match.toJSON();
   }
 }
 
@@ -156,7 +159,7 @@ const hooks = {
 
 module.exports = function (app) {
   const options = {
-    Model: app.get('mongooseClient').model('matches', modelSchema),
+    Model: app.get('mongooseClient').model('matches', MatchSchema),
     paginate: app.get('paginate'),
     lean: false,
   };

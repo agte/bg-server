@@ -59,24 +59,6 @@ class Users extends Service {
     const id = new ObjectId();
     return super._create({ ...data, _id: id, owner: id }, params);
   }
-
-  async addRole(id, role) {
-    const user = await this._get(id);
-    if (!user.roles.includes(role)) {
-      user.roles.push(role);
-      await user.save();
-    }
-    return user.toJSON();
-  }
-
-  async removeRole(id, role) {
-    const user = await this._get(id);
-    if (user.roles.includes(role)) {
-      user.roles = user.roles.filter((item) => item !== role);
-      await user.save();
-    }
-    return user.toJSON();
-  }
 }
 
 const hooks = {

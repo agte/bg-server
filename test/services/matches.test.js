@@ -32,7 +32,7 @@ describe('Matches', () => {
   });
 
   describe('Draft', () => {
-    it('checks the specified game', async () => {
+    it('match checks the specified game', async () => {
       try {
         await Match.create({ game: FAKE_ID }, { provider: 'test', user: userA });
         assert.fail();
@@ -41,7 +41,7 @@ describe('Matches', () => {
       }
     });
 
-    it('creates a match', async () => {
+    it('user creates a match', async () => {
       match = await Match.create({ game: game.id }, { provider: 'test', user: userA });
       assert.equal(match.game, game.id);
       assert.equal(match.status, 'draft');
@@ -54,6 +54,19 @@ describe('Matches', () => {
         userC: { route: { pid: match.id }, provider: 'test', user: userC },
       };
     });
+
+    it('owner joins his match in draft status', async () => {
+      await MatchPlayers.create({}, requestParams.userA);
+      match = await Match.get(match.id);
+      assert.equal(match.players[0].id, userA.id);
+      assert.equal(match.players[0].name, userA.name);
+    });
+
+    it('owner leaves his match in draft status', async () => {
+      await MatchPlayers.remove(userA.id, requestParams.userA);
+      match = await Match.get(match.id);
+      assert.equal(match.players.length, 0);
+    });
   });
 
   describe('Gathering', () => {
@@ -64,6 +77,7 @@ describe('Matches', () => {
     });
 
     it('no one can join the match twice', async () => {
+      await MatchPlayers.create({}, requestParams.userA);
       try {
         await MatchPlayers.create({}, requestParams.userA);
         assert.fail();
@@ -73,9 +87,10 @@ describe('Matches', () => {
     });
 
     it('another user joins the match', async () => {
-      const player = await MatchPlayers.create({}, requestParams.userB);
-      assert.equal(player.id, userB.id);
-      assert.equal(player.name, userB.name);
+      await MatchPlayers.create({}, requestParams.userB);
+      match = await Match.get(match.id);
+      assert.equal(match.players[1].id, userB.id);
+      assert.equal(match.players[1].name, userB.name);
     });
 
     it('no one can join the match as extra player', async () => {
@@ -87,28 +102,10 @@ describe('Matches', () => {
       }
     });
 
-    it('shows a match\'s players', async () => {
-      const players = await MatchPlayers.find(requestParams.userA);
-      assert.equal(players[0].id, userA.id);
-      assert.equal(players[0].name, userA.name);
-      assert.ok(!players[0].password);
-      assert.equal(players[1].id, userB.id);
-      assert.equal(players[1].name, userB.name);
-    });
-
-    it('owner cannot leave his match', async () => {
-      try {
-        await MatchPlayers.remove(userA.id, requestParams.userA);
-        assert.fail();
-      } catch (e) {
-        assert.equal(e.code, 403);
-      }
-    });
-
     it('another user leaves the match', async () => {
       await MatchPlayers.remove(userB.id, requestParams.userB);
-      const players = await MatchPlayers.find(requestParams.userA);
-      assert.equal(players.length, 1);
+      match = await Match.get(match.id);
+      assert.equal(match.players.length, 1);
     });
   });
 
