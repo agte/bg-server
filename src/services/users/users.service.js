@@ -3,7 +3,9 @@ const { Service } = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
 const { hashPassword, protect } = require('@feathersjs/authentication-local').hooks;
 
-const { checkRoles, addAccessFilter, checkAccess } = require('../../hooks/authorization.js');
+const addAccessFilter = require('../../hooks/authorization/addAccessFilter.js');
+const checkAccess = require('../../hooks/authorization/checkAccess.js');
+const checkRoles = require('../../hooks/authorization/checkRoles.js');
 const validate = require('../../hooks/validate.js');
 
 const createSchema = require('./schemas/create.json');

@@ -1,6 +1,8 @@
 const { Conflict } = require('@feathersjs/errors');
-const { checkAccess } = require('../../hooks/authorization.js');
+
+const checkAccess = require('../../hooks/authorization/checkAccess.js');
 const validate = require('../../hooks/validate.js');
+
 const changeStatusSchema = require('./schemas/changeStatus.json');
 
 const allowedSwitches = {

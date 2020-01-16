@@ -1,19 +1,17 @@
-const { Schema, mongo: { ObjectId } } = require('mongoose');
-const { Service } = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
-const { BadRequest, Conflict } = require('@feathersjs/errors');
 const { protect } = require('@feathersjs/authentication-local').hooks;
+const { BadRequest, Conflict } = require('@feathersjs/errors');
+const { Service } = require('feathers-mongoose');
+const { Schema, mongo: { ObjectId } } = require('mongoose');
 
-const {
-  checkRoles,
-  addAccessFilter,
-  checkAccess,
-  setOwner,
-  setAccessControl,
-  ACLSchema,
-} = require('../../hooks/authorization.js');
+const addAccessFilter = require('../../hooks/authorization/addAccessFilter.js');
+const checkAccess = require('../../hooks/authorization/checkAccess.js');
+const checkRoles = require('../../hooks/authorization/checkRoles.js');
+const setAccessControl = require('../../hooks/authorization/setAccessControl.js');
+const setOwner = require('../../hooks/authorization/setOwner.js');
 const validate = require('../../hooks/validate.js');
 
+const ACLSchema = require('../../mongoose/ACLSchema.js');
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
 

@@ -1,6 +1,9 @@
 const { Conflict, NotFound } = require('@feathersjs/errors');
-const { checkAccess, checkRoles } = require('../../hooks/authorization.js');
+
+const checkAccess = require('../../hooks/authorization/checkAccess.js');
+const checkRoles = require('../../hooks/authorization/checkRoles.js');
 const validate = require('../../hooks/validate.js');
+
 const createRoleSchema = require('./schemas/createRole.json');
 
 class UserRoles {

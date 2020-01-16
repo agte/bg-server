@@ -1,6 +1,8 @@
 const { Forbidden, Conflict, NotFound } = require('@feathersjs/errors');
-const { checkAccess } = require('../../hooks/authorization.js');
+
+const checkAccess = require('../../hooks/authorization/checkAccess.js');
 const validate = require('../../hooks/validate.js');
+
 const addPlayerSchema = require('./schemas/addPlayer.json');
 
 const playerInfo = (user) => ({ id: user.id, name: user.name });

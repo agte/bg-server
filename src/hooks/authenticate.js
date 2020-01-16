@@ -6,12 +6,13 @@ module.exports = () => (context) => {
     throw new Error('authenticate hook must be used as a before hook');
   }
 
-  const { params } = context;
-  if (params.user) {
+  if (context.params.user) {
     return context;
   }
 
-  if (!params.provider) {
+  const { params: { authentication, headers, provider } } = context;
+
+  if (!provider) {
     context.params.user = {
       id: '000000000000000000000001',
       roles: ['system'],
@@ -19,7 +20,7 @@ module.exports = () => (context) => {
     return context;
   }
 
-  if (params.provider && !params.authentication && (!params.headers || !params.headers.authorization)) {
+  if (!authentication && (!headers || !headers.authorization)) {
     context.params.user = {
       id: '000000000000000000000002',
       roles: ['guest'],
