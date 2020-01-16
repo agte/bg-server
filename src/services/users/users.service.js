@@ -72,7 +72,6 @@ const hooks = {
       checkAccess(),
     ],
     create: [
-      checkRoles('guest'),
       validate(createSchema),
       hashPassword('password'),
     ],
