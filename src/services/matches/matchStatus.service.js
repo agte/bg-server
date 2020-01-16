@@ -5,20 +5,19 @@ const changeStatusSchema = require('./schemas/changeStatus.json');
 
 const allowedSwitches = {
   draft: ['gathering'],
+  gathering: ['draft', 'pending'],
   pending: ['gathering', 'launched'],
-  gathering: ['pending'],
   launched: ['aborted'],
 };
 
 class MatchStatus {
   constructor(options, app) {
     this.options = options || {};
-    this.matches = app.service('matches');
-    this.matchPlayers = app.service('matches/:pid/players');
+    this.Match = app.service('matches');
   }
 
   async update(id, { value: newStatus }, { route }) {
-    const matchDoc = await this.matches._get(route.pid);
+    const matchDoc = await this.Match._get(route.pid);
     const currentStatus = matchDoc.status;
 
     if (!allowedSwitches[currentStatus].includes(newStatus)) {
@@ -33,6 +32,8 @@ class MatchStatus {
 
     matchDoc.status = newStatus;
     await matchDoc.save();
+
+    this.Match.emit('patched', matchDoc.toJSON());
     return { value: newStatus };
   }
 }
@@ -48,5 +49,7 @@ const hooks = {
 
 module.exports = function (app) {
   app.use('/matches/:pid/status', new MatchStatus({ parent: 'matches' }, app));
-  app.service('matches/:pid/status').hooks(hooks);
+  const service = app.service('matches/:pid/status');
+  service.hooks(hooks);
+  service.publish('updated', () => null);
 };

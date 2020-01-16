@@ -4,6 +4,7 @@
     "value": {
       "type": "string",
       "enum": [
+        "draft",
         "gathering",
         "pending",
         "launched",

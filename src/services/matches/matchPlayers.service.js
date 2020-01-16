@@ -8,17 +8,16 @@ const playerInfo = (user) => ({ id: user.id, name: user.name });
 class MatchPlayers {
   constructor(options, app) {
     this.options = options || {};
-    this.matches = app.service('matches');
-    this.matchStatus = app.service('matches/:pid/status');
-    this.users = app.service('users');
+    this.Match = app.service('matches');
+    this.User = app.service('users');
   }
 
   async find({ route }) {
-    const matchDoc = await this.matches._get(route.pid);
+    const matchDoc = await this.Match._get(route.pid);
     if (!matchDoc.players.length) {
       return [];
     }
-    const { data: players } = await this.users._find({
+    const { data: players } = await this.User._find({
       query: { _id: { $in: matchDoc.players } },
     });
     const playersMap = new Map(
@@ -29,7 +28,7 @@ class MatchPlayers {
 
   // join the game (only itself)
   async create(data, { route, user }) {
-    const matchDoc = await this.matches._get(route.pid);
+    const matchDoc = await this.Match._get(route.pid);
 
     if (matchDoc.status !== 'gathering') {
       throw new Conflict('Joining a match is not allowed now');
@@ -45,12 +44,14 @@ class MatchPlayers {
 
     matchDoc.players.push(user.id);
     await matchDoc.save();
+
+    this.Match.emit('patched', matchDoc.toJSON());
     return playerInfo(user);
   }
 
   // leave the game (any player) or pull someone out from the game (allowed only to admins)
   async remove(id, { route, user }) {
-    const matchDoc = await this.matches._get(route.pid);
+    const matchDoc = await this.Match._get(route.pid);
 
     if (matchDoc.status !== 'gathering') {
       throw new Conflict('Leaving a match is not allowed now');
@@ -72,6 +73,8 @@ class MatchPlayers {
 
     matchDoc.players.pull(id);
     await matchDoc.save();
+
+    this.Match.emit('patched', matchDoc.toJSON());
     return { id };
   }
 }
@@ -93,5 +96,8 @@ const hooks = {
 
 module.exports = function (app) {
   app.use('/matches/:pid/players', new MatchPlayers({ parent: 'matches' }, app));
-  app.service('matches/:pid/players').hooks(hooks);
+  const service = app.service('matches/:pid/players');
+  service.hooks(hooks);
+  service.publish('created', () => null);
+  service.publish('removed', () => null);
 };
