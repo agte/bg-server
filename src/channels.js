@@ -27,7 +27,6 @@ module.exports = function (app) {
     let names = [];
     if (data.acl && data.acl.read) {
       names = data.acl.read;
-      delete data.acl;
     }
     if (data.owner) {
       names.push(data.owner);

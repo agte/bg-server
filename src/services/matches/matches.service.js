@@ -1,5 +1,4 @@
 const { disallow } = require('feathers-hooks-common');
-const { protect } = require('@feathersjs/authentication-local').hooks;
 const { BadRequest, Conflict } = require('@feathersjs/errors');
 const { Service } = require('feathers-mongoose');
 const { Schema } = require('mongoose');
@@ -150,11 +149,6 @@ const hooks = {
       checkAccess(),
     ],
   },
-  after: {
-    all: [
-      protect('acl'),
-    ],
-  },
 };
 
 module.exports = function (app) {
@@ -164,6 +158,6 @@ module.exports = function (app) {
     lean: false,
   };
   app.use('/matches', new Matches(options, app));
-  const service = app.service('matches')
+  const service = app.service('matches');
   service.hooks(hooks);
 };
