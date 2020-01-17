@@ -1,4 +1,4 @@
-const { Schema, mongo: { ObjectId } } = require('mongoose');
+const { mongo: { ObjectId } } = require('mongoose');
 const { Service } = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
 const { hashPassword, protect } = require('@feathersjs/authentication-local').hooks;
@@ -8,51 +8,10 @@ const checkAccess = require('../../hooks/authorization/checkAccess.js');
 const checkRoles = require('../../hooks/authorization/checkRoles.js');
 const validate = require('../../hooks/validate.js');
 
+const UserSchema = require('./User.schema.js');
+
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
-
-const modelSchema = new Schema({
-  roles: {
-    type: [String],
-    default: ['user'],
-  },
-  name: {
-    type: String,
-    minlength: 2,
-    maxlength: 25,
-    required: true,
-    unique: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-  },
-  password: {
-    type: String,
-  },
-  googleId: {
-    type: String,
-  },
-  owner: {
-    type: Schema.Types.ObjectId,
-    required: true,
-  },
-}, {
-  timestamps: true,
-  toJSON: {
-    versionKey: false,
-    /* eslint-disable no-param-reassign */
-    transform: (doc, ret) => {
-      ret.id = ret._id.toString();
-      delete ret._id;
-      ret.owner = ret.owner.toString();
-      return ret;
-    },
-    /* eslint-enable no-param-reassign */
-  },
-});
 
 class Users extends Service {
   async _create(data, params) {
@@ -97,7 +56,7 @@ const hooks = {
 
 module.exports = function (app) {
   const options = {
-    Model: app.get('mongooseClient').model('user', modelSchema),
+    Model: app.get('mongooseClient').model('User', UserSchema),
     paginate: app.get('paginate'),
     lean: false,
   };

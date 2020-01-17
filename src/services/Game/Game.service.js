@@ -1,7 +1,5 @@
-const { Schema } = require('mongoose');
 const { Service } = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
-const { protect } = require('@feathersjs/authentication-local').hooks;
 
 const addAccessFilter = require('../../hooks/authorization/addAccessFilter.js');
 const checkAccess = require('../../hooks/authorization/checkAccess.js');
@@ -10,49 +8,10 @@ const setAccessControl = require('../../hooks/authorization/setAccessControl.js'
 const setOwner = require('../../hooks/authorization/setOwner.js');
 const validate = require('../../hooks/validate.js');
 
-const ACLSchema = require('../../mongoose/ACLSchema.js');
+const GameSchema = require('./Game.schema.js');
+
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
-
-const modelSchema = new Schema({
-  name: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  engine: {
-    type: String,
-    required: true,
-  },
-  minPlayers: {
-    type: Number,
-    min: 1,
-    default: 1,
-  },
-  maxPlayers: {
-    type: Number,
-    min: 0,
-    default: 0,
-  },
-  owner: {
-    type: Schema.Types.ObjectId,
-    required: true,
-  },
-  acl: ACLSchema,
-}, {
-  timestamps: true,
-  toJSON: {
-    versionKey: false,
-    /* eslint-disable no-param-reassign */
-    transform: (doc, ret) => {
-      ret.id = ret._id.toString();
-      delete ret._id;
-      ret.owner = ret.owner.toString();
-      return ret;
-    },
-    /* eslint-enable no-param-reassign */
-  },
-});
 
 class Games extends Service {
 }
@@ -82,16 +41,11 @@ const hooks = {
       checkAccess(),
     ],
   },
-  after: {
-    all: [
-      protect('acl'),
-    ],
-  },
 };
 
 module.exports = function (app) {
   const options = {
-    Model: app.get('mongooseClient').model('game', modelSchema),
+    Model: app.get('mongooseClient').model('Game', GameSchema),
     paginate: app.get('paginate'),
     lean: false,
   };
