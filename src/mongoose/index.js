@@ -19,6 +19,7 @@ module.exports = function (app) {
   });
 
   mongoose.Promise = global.Promise;
+  mongoose.pluralize(null);
 
   app.set('mongooseClient', mongoose);
   app.set('mongooseConnect', mongooseConnect);
