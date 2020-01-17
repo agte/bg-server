@@ -8,7 +8,7 @@ const createRoleSchema = require('./schemas/createRole.json');
 class UserRoles {
   constructor(options, app) {
     this.options = options || {};
-    this.User = app.service('users');
+    this.User = app.service('user');
   }
 
   async create({ id }, { route }) {
@@ -45,8 +45,8 @@ const hooks = {
 };
 
 module.exports = function (app) {
-  app.use('/users/:pid/roles', new UserRoles({ parent: 'users' }, app));
-  const service = app.service('users/:pid/roles');
+  app.use('/user/:pid/roles', new UserRoles({ parent: 'user' }, app));
+  const service = app.service('user/:pid/roles');
   service.hooks(hooks);
   service.publish('created', () => null);
   service.publish('removed', () => null);

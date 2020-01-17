@@ -1,44 +1,44 @@
-const { Schema, mongo: { ObjectId } } = require('mongoose');
+const { Schema } = require('mongoose');
 const { Service } = require('feathers-mongoose');
 const { disallow } = require('feathers-hooks-common');
-const { hashPassword, protect } = require('@feathersjs/authentication-local').hooks;
+const { protect } = require('@feathersjs/authentication-local').hooks;
 
 const addAccessFilter = require('../../hooks/authorization/addAccessFilter.js');
 const checkAccess = require('../../hooks/authorization/checkAccess.js');
 const checkRoles = require('../../hooks/authorization/checkRoles.js');
+const setAccessControl = require('../../hooks/authorization/setAccessControl.js');
+const setOwner = require('../../hooks/authorization/setOwner.js');
 const validate = require('../../hooks/validate.js');
 
+const ACLSchema = require('../../mongoose/ACLSchema.js');
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
 
 const modelSchema = new Schema({
-  roles: {
-    type: [String],
-    default: ['user'],
-  },
   name: {
     type: String,
-    minlength: 2,
-    maxlength: 25,
-    required: true,
     unique: true,
+    required: true,
   },
-  email: {
+  engine: {
     type: String,
     required: true,
-    unique: true,
-    lowercase: true,
   },
-  password: {
-    type: String,
+  minPlayers: {
+    type: Number,
+    min: 1,
+    default: 1,
   },
-  googleId: {
-    type: String,
+  maxPlayers: {
+    type: Number,
+    min: 0,
+    default: 0,
   },
   owner: {
     type: Schema.Types.ObjectId,
     required: true,
   },
+  acl: ACLSchema,
 }, {
   timestamps: true,
   toJSON: {
@@ -54,26 +54,22 @@ const modelSchema = new Schema({
   },
 });
 
-class Users extends Service {
-  async _create(data, params) {
-    const id = new ObjectId();
-    return super._create({ ...data, _id: id, owner: id }, params);
-  }
+class Games extends Service {
 }
 
 const hooks = {
   before: {
     find: [
-      checkRoles('user'),
       addAccessFilter(),
     ],
     get: [
-      checkRoles('user'),
       checkAccess(),
     ],
     create: [
+      checkRoles('designer'),
       validate(createSchema),
-      hashPassword('password'),
+      setOwner(),
+      setAccessControl('read', 'user'),
     ],
     update: [
       disallow(),
@@ -81,26 +77,24 @@ const hooks = {
     patch: [
       checkAccess(),
       validate(patchSchema),
-      hashPassword('password'),
     ],
     remove: [
-      disallow(),
+      checkAccess(),
     ],
   },
-
   after: {
     all: [
-      protect('password'),
+      protect('acl'),
     ],
   },
 };
 
 module.exports = function (app) {
   const options = {
-    Model: app.get('mongooseClient').model('users', modelSchema),
+    Model: app.get('mongooseClient').model('game', modelSchema),
     paginate: app.get('paginate'),
     lean: false,
   };
-  app.use('/users', new Users(options, app));
-  app.service('users').hooks(hooks);
+  app.use('/game', new Games(options, app));
+  app.service('game').hooks(hooks);
 };

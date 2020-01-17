@@ -3,8 +3,8 @@ const app = require('../../src/app');
 const reset = require('../reset.js');
 
 describe('User roles', () => {
-  const usersService = app.service('users');
-  const rolesService = app.service('users/:pid/roles');
+  const User = app.service('user');
+  const UserRoles = app.service('user/:pid/roles');
 
   let userA;
 
@@ -12,7 +12,7 @@ describe('User roles', () => {
 
   describe('Default roles', () => {
     it('every user should get role "user"', async () => {
-      userA = await usersService.create({
+      userA = await User.create({
         name: 'AAA',
         email: 'userA@example.com',
         password: '123456',
@@ -23,8 +23,8 @@ describe('User roles', () => {
 
   describe('Adding', () => {
     it('should add the specified role internally', async () => {
-      await rolesService.create({ id: 'admin' }, { route: { pid: userA.id } });
-      const updatedUser = await usersService.get(userA.id);
+      await UserRoles.create({ id: 'admin' }, { route: { pid: userA.id } });
+      const updatedUser = await User.get(userA.id);
       assert.equal(updatedUser.roles.toString(), 'user,admin');
       userA = updatedUser;
     });
@@ -32,8 +32,8 @@ describe('User roles', () => {
 
   describe('Removing', () => {
     it('should remove the specified role internally', async () => {
-      await rolesService.remove('admin', { route: { pid: userA.id } });
-      const updatedUser = await usersService.get(userA.id);
+      await UserRoles.remove('admin', { route: { pid: userA.id } });
+      const updatedUser = await User.get(userA.id);
       userA = updatedUser;
     });
   });

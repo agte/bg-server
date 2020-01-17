@@ -15,7 +15,7 @@ const allowedSwitches = {
 class MatchStatus {
   constructor(options, app) {
     this.options = options || {};
-    this.Match = app.service('matches');
+    this.Match = app.service('match');
   }
 
   async update(id, { value: newStatus }, { route }) {
@@ -50,8 +50,8 @@ const hooks = {
 };
 
 module.exports = function (app) {
-  app.use('/matches/:pid/status', new MatchStatus({ parent: 'matches' }, app));
-  const service = app.service('matches/:pid/status');
+  app.use('/match/:pid/status', new MatchStatus({ parent: 'match' }, app));
+  const service = app.service('match/:pid/status');
   service.hooks(hooks);
   service.publish('updated', () => null);
 };

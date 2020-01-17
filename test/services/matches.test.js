@@ -2,11 +2,11 @@ const assert = require('assert');
 const reset = require('../reset.js');
 const app = require('../../src/app.js');
 
-const User = app.service('users');
-const Game = app.service('games');
-const Match = app.service('matches');
-const MatchPlayers = app.service('matches/:pid/players');
-const MatchStatus = app.service('matches/:pid/status');
+const User = app.service('user');
+const Game = app.service('game');
+const Match = app.service('match');
+const MatchPlayers = app.service('match/:pid/players');
+const MatchStatus = app.service('match/:pid/status');
 
 const FAKE_ID = '000000000000000000000000';
 

@@ -87,10 +87,10 @@ const MatchSchema = new Schema({
   },
 });
 
-class Matches extends Service {
+class Match extends Service {
   constructor(options, app) {
     super(options, app);
-    this.Game = app.service('games');
+    this.Game = app.service('game');
   }
 
   async _create(data, params) {
@@ -153,11 +153,11 @@ const hooks = {
 
 module.exports = function (app) {
   const options = {
-    Model: app.get('mongooseClient').model('matches', MatchSchema),
+    Model: app.get('mongooseClient').model('match', MatchSchema),
     paginate: app.get('paginate'),
     lean: false,
   };
-  app.use('/matches', new Matches(options, app));
-  const service = app.service('matches');
+  app.use('/match', new Match(options, app));
+  const service = app.service('match');
   service.hooks(hooks);
 };

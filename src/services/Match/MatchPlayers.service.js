@@ -8,8 +8,8 @@ const addPlayerSchema = require('./schemas/addPlayer.json');
 class MatchPlayers {
   constructor(options, app) {
     this.options = options || {};
-    this.Match = app.service('matches');
-    this.User = app.service('users');
+    this.Match = app.service('match');
+    this.User = app.service('user');
   }
 
   // join the game (only itself)
@@ -78,8 +78,8 @@ const hooks = {
 };
 
 module.exports = function (app) {
-  app.use('/matches/:pid/players', new MatchPlayers({ parent: 'matches' }, app));
-  const service = app.service('matches/:pid/players');
+  app.use('/match/:pid/players', new MatchPlayers({ parent: 'match' }, app));
+  const service = app.service('match/:pid/players');
   service.hooks(hooks);
   service.publish('created', () => null);
   service.publish('removed', () => null);

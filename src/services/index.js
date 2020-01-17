@@ -1,15 +1,15 @@
-const users = require('./users/users.service.js');
-const userRoles = require('./users/userRoles.service.js');
-const games = require('./games/games.service.js');
-const matches = require('./matches/matches.service.js');
-const matchPlayers = require('./matches/matchPlayers.service.js');
-const matchStatus = require('./matches/matchStatus.service.js');
+const User = require('./User/User.service.js');
+const UserRoles = require('./User/UserRoles.service.js');
+const Game = require('./Game/Game.service.js');
+const Match = require('./Match/Match.service.js');
+const MatchPlayers = require('./Match/MatchPlayers.service.js');
+const MatchStatus = require('./Match/MatchStatus.service.js');
 
 module.exports = function (app) {
-  app.configure(users);
-  app.configure(userRoles);
-  app.configure(games);
-  app.configure(matches);
-  app.configure(matchPlayers);
-  app.configure(matchStatus);
+  app.configure(User);
+  app.configure(UserRoles);
+  app.configure(Game);
+  app.configure(Match);
+  app.configure(MatchPlayers);
+  app.configure(MatchStatus);
 };

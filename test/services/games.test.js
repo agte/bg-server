@@ -3,7 +3,7 @@ const reset = require('../reset.js');
 const app = require('../../src/app.js');
 
 describe('Games', () => {
-  const gamesService = app.service('games');
+  const Game = app.service('game');
 
   before(() => reset(app));
 
@@ -21,7 +21,7 @@ describe('Games', () => {
 
   describe('Designer', () => {
     it('can create a new game', async () => {
-      const game = await gamesService.create(
+      const game = await Game.create(
         {
           name: 'Tic-Tac-Toe',
           engine: 'tic-tac-toe',
@@ -37,7 +37,7 @@ describe('Games', () => {
     });
 
     it('can patch his own game', async () => {
-      const updatedGame = await gamesService.patch(
+      const updatedGame = await Game.patch(
         gameA.id,
         { name: 'Krestiki-Noliki' },
         { provider: 'rest', user: designerA },
@@ -47,12 +47,12 @@ describe('Games', () => {
     });
 
     it('cannot patch a game he does not own', async () => {
-      gameB = await gamesService.create(
+      gameB = await Game.create(
         { name: 'Chess', engine: 'chess' },
         { provider: 'rest', user: designerB },
       );
       try {
-        await gamesService.patch(
+        await Game.patch(
           gameB.id,
           { name: 'Checkers' },
           { provider: 'rest', user: designerA },

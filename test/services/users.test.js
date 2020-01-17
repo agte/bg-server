@@ -3,7 +3,7 @@ const app = require('../../src/app.js');
 const reset = require('../reset.js');
 
 describe('Users', () => {
-  const usersService = app.service('users');
+  const usersService = app.service('user');
 
   let userA;
   let userB;
