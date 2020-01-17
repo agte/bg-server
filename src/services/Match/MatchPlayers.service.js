@@ -12,9 +12,8 @@ class MatchPlayers {
     this.User = app.service('user');
   }
 
-  // join the game (only itself)
   async create(data, { route, user }) {
-    const matchDoc = await this.Match._get(route.pid);
+    const matchDoc = await this.Match.Model.findById(route.pid);
     const isOwner = user.id === matchDoc.owner.toString();
 
     if (matchDoc.status !== 'gathering' && !(isOwner && matchDoc.status === 'draft')) {
@@ -36,9 +35,8 @@ class MatchPlayers {
     return matchDoc.players[matchDoc.players.length - 1];
   }
 
-  // leave the game (any player) or pull someone out from the game (allowed only to admins)
   async remove(id, { route, user }) {
-    const matchDoc = await this.Match._get(route.pid);
+    const matchDoc = await this.Match.Model.findById(route.pid);
     const isOwner = user.id === matchDoc.owner.toString();
 
     if (matchDoc.status !== 'gathering' && !(isOwner && matchDoc.status === 'draft')) {

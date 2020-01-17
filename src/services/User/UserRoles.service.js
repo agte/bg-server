@@ -12,7 +12,7 @@ class UserRoles {
   }
 
   async create({ id }, { route }) {
-    const userDoc = await this.User._get(route.pid);
+    const userDoc = await this.User.Model.findById(route.pid);
     if (userDoc.roles.includes(id)) {
       throw new Conflict('Duplicate role');
     }
@@ -22,7 +22,7 @@ class UserRoles {
   }
 
   async remove(id, { route }) {
-    const userDoc = await this.User._get(route.pid);
+    const userDoc = await this.User.Model.findById(route.pid);
     if (!userDoc.roles.includes(id)) {
       throw new NotFound('Role not found');
     }

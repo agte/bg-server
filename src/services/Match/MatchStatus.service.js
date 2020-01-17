@@ -19,7 +19,7 @@ class MatchStatus {
   }
 
   async update(id, { value: newStatus }, { route }) {
-    const matchDoc = await this.Match._get(route.pid);
+    const matchDoc = await this.Match.Model.findById(route.pid);
     const currentStatus = matchDoc.status;
 
     if (!allowedSwitches[currentStatus].includes(newStatus)) {
