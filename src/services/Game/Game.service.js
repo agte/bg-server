@@ -28,7 +28,7 @@ const hooks = {
       checkRoles('designer'),
       validate(createSchema),
       setOwner(),
-      setAccessControl('read', 'user'),
+      setAccessControl('read', 'user', 'guest'),
     ],
     update: [
       disallow(),

@@ -7,12 +7,17 @@ describe('Games', () => {
 
   before(() => reset(app));
 
-  const designerA = {
+  const user = {
     id: '000000000000000000000000',
+    roles: ['user'],
+  };
+
+  const designerA = {
+    id: '000000000000000000000001',
     roles: ['user', 'designer'],
   };
   const designerB = {
-    id: '000000000000000000000001',
+    id: '000000000000000000000002',
     roles: ['user', 'designer'],
   };
 
@@ -20,7 +25,7 @@ describe('Games', () => {
   let gameB;
 
   describe('Designer', () => {
-    it('can create a new game', async () => {
+    it('creates a new game', async () => {
       const game = await Game.create(
         {
           name: 'Tic-Tac-Toe',
@@ -28,7 +33,7 @@ describe('Games', () => {
           minPlayers: 2,
           maxPlayers: 2,
         },
-        { provider: 'rest', user: designerA },
+        { provider: 'test', user: designerA },
       );
       assert.ok(game.id);
       assert.equal(game.name, 'Tic-Tac-Toe');
@@ -36,11 +41,11 @@ describe('Games', () => {
       gameA = game;
     });
 
-    it('can patch his own game', async () => {
+    it('patches his own game', async () => {
       const updatedGame = await Game.patch(
         gameA.id,
         { name: 'Krestiki-Noliki' },
-        { provider: 'rest', user: designerA },
+        { provider: 'test', user: designerA },
       );
       assert.equal(updatedGame.name, 'Krestiki-Noliki');
       gameA = updatedGame;
@@ -49,18 +54,32 @@ describe('Games', () => {
     it('cannot patch a game he does not own', async () => {
       gameB = await Game.create(
         { name: 'Chess', engine: 'chess' },
-        { provider: 'rest', user: designerB },
+        { provider: 'test', user: designerB },
       );
       try {
         await Game.patch(
           gameB.id,
           { name: 'Checkers' },
-          { provider: 'rest', user: designerA },
+          { provider: 'test', user: designerA },
         );
         assert.fail('Never get here');
       } catch (e) {
         assert.equal(e.code, 403); // Forbidden
       }
+    });
+  });
+
+  describe('User', () => {
+    it('sees all games', async () => {
+      const { data } = await Game.find({ provider: 'test', user });
+      assert.equal(data.length, 2);
+    });
+  });
+
+  describe('Guest', () => {
+    it('sees all games', async () => {
+      const { data } = await Game.find({ provider: 'test' });
+      assert.equal(data.length, 2);
     });
   });
 });

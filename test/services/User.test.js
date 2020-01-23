@@ -12,7 +12,7 @@ describe('Users', () => {
   before(() => reset(app));
 
   describe('Guest user', () => {
-    it('guest signs up', async () => {
+    it('signs up', async () => {
       const userAInfo = {
         name: 'AAA',
         email: 'userA@example.com',
@@ -34,11 +34,11 @@ describe('Users', () => {
   });
 
   describe('Common user', () => {
-    it('every registered user has role "user"', async () => {
+    it('has one and only role "user" by default', async () => {
       assert.equal(userA.roles.toString(), 'user');
     });
 
-    it('common user sees only himself when listing users', async () => {
+    it('sees only himself in user list', async () => {
       const { total, data: users } = await User.find({ provider: 'rest', user: userB });
       assert.equal(total, 1);
       assert.equal(users[0].id, userB.id);
