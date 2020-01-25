@@ -27,7 +27,8 @@ class MatchStatus {
       throw new Conflict(`You cannot switch status from ${currentStatus} to ${newStatus}`);
     }
 
-    if (currentStatus === 'gathering' && matchDoc.players.length < matchDoc.minPlayers
+    if (currentStatus === 'gathering' && newStatus === 'launched'
+      && matchDoc.players.length < matchDoc.minPlayers
     ) {
       throw new Conflict('There are not enough players');
     }
