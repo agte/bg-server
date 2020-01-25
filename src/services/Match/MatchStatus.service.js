@@ -7,9 +7,10 @@ const changeStatusSchema = require('./schemas/changeStatus.json');
 
 const allowedSwitches = {
   draft: ['gathering'],
-  gathering: ['draft', 'pending'],
-  pending: ['gathering', 'launched'],
-  launched: ['aborted'],
+  gathering: ['launched', 'draft'],
+  launched: ['finished', 'aborted'],
+  finished: [],
+  aborted: [],
 };
 
 class MatchStatus {
@@ -26,8 +27,7 @@ class MatchStatus {
       throw new Conflict(`You cannot switch status from ${currentStatus} to ${newStatus}`);
     }
 
-    if (currentStatus === 'gathering' && newStatus === 'pending'
-        && matchDoc.players.length < matchDoc.minPlayers
+    if (currentStatus === 'gathering' && matchDoc.players.length < matchDoc.minPlayers
     ) {
       throw new Conflict('There are not enough players');
     }

@@ -33,7 +33,6 @@ const MatchSchema = new Schema({
     enum: [
       'draft',
       'gathering',
-      'pending',
       'launched',
       'finished',
       'aborted',

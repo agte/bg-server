@@ -6,8 +6,8 @@
       "enum": [
         "draft",
         "gathering",
-        "pending",
         "launched",
+        "finished",
         "aborted"
       ]
     }
