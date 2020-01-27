@@ -3,6 +3,9 @@ const { Schema } = require('mongoose');
 const ACLSchema = require('../../mongoose/ACLSchema.js');
 
 const PlayerSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+  },
   name: {
     type: String,
     required: true,
@@ -17,6 +20,7 @@ const PlayerSchema = new Schema({
     transform: (doc, ret) => {
       ret.id = ret._id.toString();
       delete ret._id;
+      ret.user = ret.user.toString();
       return ret;
     },
     /* eslint-enable no-param-reassign */

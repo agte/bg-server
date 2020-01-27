@@ -24,11 +24,7 @@ class MatchPlayers {
       throw new Conflict('Maximum number of players reached');
     }
 
-    if (matchDoc.players.id(user.id)) {
-      throw new Conflict('Duplicate player');
-    }
-
-    matchDoc.players.push({ _id: user.id, name: user.name });
+    matchDoc.players.push({ user: user.id, name: user.name });
     await matchDoc.save();
 
     this.Match.emit('patched', matchDoc.toJSON());
@@ -43,13 +39,13 @@ class MatchPlayers {
       throw new Conflict('Leaving a match is not allowed now');
     }
 
-    if (user.id === matchDoc.owner.toString() && user.id !== id) {
-      throw new Forbidden('You cannot delete anyone except yourself from the match');
-    }
-
     const player = matchDoc.players.id(id);
     if (!player) {
       throw new NotFound('Player not found');
+    }
+
+    if (user.id === matchDoc.owner.toString() && user.id !== player.user.toString()) {
+      throw new Forbidden('You cannot delete anyone except yourself from the match');
     }
 
     player.remove();

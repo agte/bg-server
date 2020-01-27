@@ -61,12 +61,13 @@ describe('Matches', () => {
       it('joins his draft match', async () => {
         await MatchPlayers.create({}, requestParams.userA);
         match = await Match.get(match.id);
-        assert.equal(match.players[0].id, userA.id);
+        assert.ok(match.players[0].id);
+        assert.equal(match.players[0].user, userA.id);
         assert.equal(match.players[0].name, userA.name);
       });
 
       it('leaves his draft match', async () => {
-        await MatchPlayers.remove(userA.id, requestParams.userA);
+        await MatchPlayers.remove(match.players[0].id, requestParams.userA);
         match = await Match.get(match.id);
         assert.equal(match.players.length, 0);
       });
@@ -86,22 +87,13 @@ describe('Matches', () => {
         match = await Match.get(match.id);
         assert.equal(match.players.length, 1);
       });
-
-      it('cannot join his match twice', async () => {
-        try {
-          await MatchPlayers.create({}, requestParams.userA);
-          assert.fail();
-        } catch (e) {
-          assert.equal(e.code, 409);
-        }
-      });
     });
 
     describe('Another user', () => {
       it('joins a match', async () => {
         await MatchPlayers.create({}, requestParams.userB);
         match = await Match.get(match.id);
-        assert.equal(match.players[1].id, userB.id);
+        assert.equal(match.players[1].user, userB.id);
         assert.equal(match.players[1].name, userB.name);
       });
 
@@ -115,7 +107,7 @@ describe('Matches', () => {
       });
 
       it('leaves a match', async () => {
-        await MatchPlayers.remove(userB.id, requestParams.userB);
+        await MatchPlayers.remove(match.players[1].id, requestParams.userB);
         match = await Match.get(match.id);
         assert.equal(match.players.length, 1);
       });
@@ -144,7 +136,7 @@ describe('Matches', () => {
     describe('Another user', () => {
       it('can\'t leave a launched match', async () => {
         try {
-          await MatchPlayers.remove(userC.id, requestParams.userC);
+          await MatchPlayers.remove(match.players[1].id, requestParams.userC);
           assert.fail();
         } catch (e) {
           assert.equal(e.code, 409);
