@@ -13,30 +13,30 @@ const allowedSwitches = {
   aborted: [],
 };
 
-class MatchStatus {
+class GameStatus {
   constructor(options, app) {
     this.options = options || {};
-    this.Match = app.service('match');
+    this.Game = app.service('game');
   }
 
   async update(id, { value: newStatus }, { route }) {
-    const matchDoc = await this.Match.Model.findById(route.pid);
-    const currentStatus = matchDoc.status;
+    const gameDoc = await this.Game.Model.findById(route.pid);
+    const currentStatus = gameDoc.status;
 
     if (!allowedSwitches[currentStatus].includes(newStatus)) {
       throw new Conflict(`You cannot switch status from ${currentStatus} to ${newStatus}`);
     }
 
     if (currentStatus === 'gathering' && newStatus === 'launched'
-      && matchDoc.players.length < matchDoc.minPlayers
+      && gameDoc.players.length < gameDoc.minPlayers
     ) {
       throw new Conflict('There are not enough players');
     }
 
-    matchDoc.status = newStatus;
-    await matchDoc.save();
+    gameDoc.status = newStatus;
+    await gameDoc.save();
 
-    this.Match.emit('patched', matchDoc.toJSON());
+    this.Game.emit('patched', gameDoc.toJSON());
     return { value: newStatus };
   }
 }
@@ -51,8 +51,8 @@ const hooks = {
 };
 
 module.exports = function (app) {
-  app.use('/match/:pid/status', new MatchStatus({ parent: 'match' }, app));
-  const service = app.service('match/:pid/status');
+  app.use('/game/:pid/status', new GameStatus({ parent: 'game' }, app));
+  const service = app.service('game/:pid/status');
   service.hooks(hooks);
   service.publish('updated', () => null);
 };

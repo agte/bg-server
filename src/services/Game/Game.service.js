@@ -9,12 +9,12 @@ const setAccessControl = require('../../hooks/authorization/setAccessControl.js'
 const setOwner = require('../../hooks/authorization/setOwner.js');
 const validate = require('../../hooks/validate.js');
 
-const MatchSchema = require('./Match.schema.js');
+const GameSchema = require('./Game.schema.js');
 
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
 
-class Match extends Service {
+class Game extends Service {
   constructor(options, app) {
     super(options, app);
     this.GameKind = app.service('gameKind');
@@ -37,7 +37,7 @@ class Match extends Service {
   async _patch(id, data, params) {
     const resource = params.resource || await this.get(id);
     if (resource.status !== 'draft') {
-      throw new Conflict(`You cannot update a match in "${resource.status}" status`);
+      throw new Conflict(`You cannot update a game in "${resource.status}" status`);
     }
     return super._patch(id, data, params);
   }
@@ -45,7 +45,7 @@ class Match extends Service {
   async _remove(id, params) {
     const resource = params.resource || await this.get(id);
     if (resource.status === 'launched' || resource.status === 'finished') {
-      throw new Conflict(`You cannot remove a match in "${resource.status}" status`);
+      throw new Conflict(`You cannot remove a game in "${resource.status}" status`);
     }
     return super._remove(id, params);
   }
@@ -80,11 +80,11 @@ const hooks = {
 
 module.exports = function (app) {
   const options = {
-    Model: app.get('mongooseClient').model('Match', MatchSchema),
+    Model: app.get('mongooseClient').model('Game', GameSchema),
     paginate: app.get('paginate'),
     lean: false,
   };
-  app.use('/match', new Match(options, app));
-  const service = app.service('match');
+  app.use('/game', new Game(options, app));
+  const service = app.service('game');
   service.hooks(hooks);
 };

@@ -27,7 +27,7 @@ const PlayerSchema = new Schema({
   },
 });
 
-const MatchSchema = new Schema({
+const GameSchema = new Schema({
   kind: {
     type: Schema.Types.ObjectId,
     required: true,
@@ -77,4 +77,4 @@ const MatchSchema = new Schema({
   },
 });
 
-module.exports = MatchSchema;
+module.exports = GameSchema;
