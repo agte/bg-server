@@ -11,15 +11,15 @@ module.exports = async (app) => {
     await UserRoles.create({ id: 'admin' }, { route: { pid: admin.id } });
   }
 
-  const Game = app.service('game');
+  const GameKind = app.service('gameKind');
 
   // Пока захардкодим крестики-нолики.
   // Затем будем задавать массив игр через конфигурационный файл.
-  const { data: [gameTicTacToe] } = await Game.find({
+  const { data: [TicTacToe] } = await GameKind.find({
     query: { name: 'Крестики-нолики', $limit: 1 },
   });
-  if (!gameTicTacToe) {
-    await Game.create({
+  if (!TicTacToe) {
+    await GameKind.create({
       name: 'Крестики-нолики',
       engine: 'tic-tac-toe',
       minPlayers: 2,

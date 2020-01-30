@@ -2,8 +2,8 @@ const assert = require('assert');
 const reset = require('../reset.js');
 const app = require('../../src/app.js');
 
-describe('Games', () => {
-  const Game = app.service('game');
+describe('GameKind', () => {
+  const GameKind = app.service('gameKind');
 
   before(() => reset(app));
 
@@ -21,12 +21,12 @@ describe('Games', () => {
     roles: ['user', 'designer'],
   };
 
-  let gameA;
-  let gameB;
+  let gameKindA;
+  let gameKindB;
 
   describe('Designer', () => {
-    it('creates a new game', async () => {
-      const game = await Game.create(
+    it('creates a new game gameKind', async () => {
+      const gameKind = await GameKind.create(
         {
           name: 'Tic-Tac-Toe',
           engine: 'tic-tac-toe',
@@ -35,30 +35,30 @@ describe('Games', () => {
         },
         { provider: 'test', user: designerA },
       );
-      assert.ok(game.id);
-      assert.equal(game.name, 'Tic-Tac-Toe');
-      assert.equal(game.owner, designerA.id);
-      gameA = game;
+      assert.ok(gameKind.id);
+      assert.equal(gameKind.name, 'Tic-Tac-Toe');
+      assert.equal(gameKind.owner, designerA.id);
+      gameKindA = gameKind;
     });
 
-    it('patches his own game', async () => {
-      const updatedGame = await Game.patch(
-        gameA.id,
+    it('patches his own game gameKind', async () => {
+      const updatedGameKind = await GameKind.patch(
+        gameKindA.id,
         { name: 'Krestiki-Noliki' },
         { provider: 'test', user: designerA },
       );
-      assert.equal(updatedGame.name, 'Krestiki-Noliki');
-      gameA = updatedGame;
+      assert.equal(updatedGameKind.name, 'Krestiki-Noliki');
+      gameKindA = updatedGameKind;
     });
 
-    it('cannot patch a game he does not own', async () => {
-      gameB = await Game.create(
+    it('cannot patch a game gameKind he does not own', async () => {
+      gameKindB = await GameKind.create(
         { name: 'Chess', engine: 'chess' },
         { provider: 'test', user: designerB },
       );
       try {
-        await Game.patch(
-          gameB.id,
+        await GameKind.patch(
+          gameKindB.id,
           { name: 'Checkers' },
           { provider: 'test', user: designerA },
         );
@@ -70,15 +70,15 @@ describe('Games', () => {
   });
 
   describe('User', () => {
-    it('sees all games', async () => {
-      const { data } = await Game.find({ provider: 'test', user });
+    it('sees all gameKinds', async () => {
+      const { data } = await GameKind.find({ provider: 'test', user });
       assert.equal(data.length, 2);
     });
   });
 
   describe('Guest', () => {
-    it('sees all games', async () => {
-      const { data } = await Game.find({ provider: 'test' });
+    it('sees all gameKinds', async () => {
+      const { data } = await GameKind.find({ provider: 'test' });
       assert.equal(data.length, 2);
     });
   });

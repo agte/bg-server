@@ -3,7 +3,7 @@ const reset = require('../reset.js');
 const app = require('../../src/app.js');
 
 const User = app.service('user');
-const Game = app.service('game');
+const GameKind = app.service('gameKind');
 const Match = app.service('match');
 const MatchPlayers = app.service('match/:pid/players');
 const MatchStatus = app.service('match/:pid/status');
@@ -13,7 +13,7 @@ const FAKE_ID = '000000000000000000000000';
 let userA;
 let userB;
 let userC;
-let game;
+let gameKind;
 let match;
 let requestParams;
 
@@ -23,7 +23,7 @@ describe('Matches', () => {
     userA = await User.create({ name: 'AAA', email: 'AAA@mail.com', password: '123123' });
     userB = await User.create({ name: 'BBB', email: 'BBB@mail.com', password: '123123' });
     userC = await User.create({ name: 'CCC', email: 'CCC@mail.com', password: '123123' });
-    game = await Game.create({
+    gameKind = await GameKind.create({
       name: 'Tic-Tac-Toe',
       engine: 'tic-tac-toe',
       minPlayers: 2,
@@ -33,9 +33,9 @@ describe('Matches', () => {
 
   describe('Draft', () => {
     describe('Common user', () => {
-      it('cannot create a match of nonexostong game', async () => {
+      it('cannot create a match of nonexostong gameKind', async () => {
         try {
-          await Match.create({ game: FAKE_ID }, { provider: 'test', user: userA });
+          await Match.create({ gameKind: FAKE_ID }, { provider: 'test', user: userA });
           assert.fail();
         } catch (e) {
           assert.equal(e.code, 400);
@@ -43,12 +43,12 @@ describe('Matches', () => {
       });
 
       it('creates a draft match', async () => {
-        match = await Match.create({ game: game.id }, { provider: 'test', user: userA });
-        assert.equal(match.game, game.id);
+        match = await Match.create({ kind: gameKind.id }, { provider: 'test', user: userA });
+        assert.equal(match.kind, gameKind.id);
         assert.equal(match.status, 'draft');
         assert.equal(match.owner, userA.id);
-        assert.equal(match.minPlayers, game.minPlayers);
-        assert.equal(match.maxPlayers, game.maxPlayers);
+        assert.equal(match.minPlayers, gameKind.minPlayers);
+        assert.equal(match.maxPlayers, gameKind.maxPlayers);
         requestParams = {
           userA: { route: { pid: match.id }, provider: 'test', user: userA },
           userB: { route: { pid: match.id }, provider: 'test', user: userB },
@@ -157,7 +157,7 @@ describe('Matches', () => {
 
   describe('Aborted', () => {
     it('owner aborts his another match', async () => {
-      const match2 = await Match.create({ game: game.id }, { provider: 'test', user: userA });
+      const match2 = await Match.create({ kind: gameKind.id }, { provider: 'test', user: userA });
       const requestParams2 = {
         userA: { route: { pid: match2.id }, provider: 'test', user: userA },
         userB: { route: { pid: match2.id }, provider: 'test', user: userB },

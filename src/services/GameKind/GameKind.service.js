@@ -8,12 +8,12 @@ const setAccessControl = require('../../hooks/authorization/setAccessControl.js'
 const setOwner = require('../../hooks/authorization/setOwner.js');
 const validate = require('../../hooks/validate.js');
 
-const GameSchema = require('./Game.schema.js');
+const GameKindSchema = require('./GameKind.schema.js');
 
 const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
 
-class Games extends Service {
+class GameKind extends Service {
 }
 
 const hooks = {
@@ -45,10 +45,10 @@ const hooks = {
 
 module.exports = function (app) {
   const options = {
-    Model: app.get('mongooseClient').model('Game', GameSchema),
+    Model: app.get('mongooseClient').model('GameKind', GameKindSchema),
     paginate: app.get('paginate'),
     lean: false,
   };
-  app.use('/game', new Games(options, app));
-  app.service('game').hooks(hooks);
+  app.use('/gameKind', new GameKind(options, app));
+  app.service('gameKind').hooks(hooks);
 };

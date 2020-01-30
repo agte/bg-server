@@ -28,7 +28,7 @@ const PlayerSchema = new Schema({
 });
 
 const MatchSchema = new Schema({
-  game: {
+  kind: {
     type: Schema.Types.ObjectId,
     required: true,
   },
@@ -69,7 +69,7 @@ const MatchSchema = new Schema({
     transform: (doc, ret) => {
       ret.id = ret._id.toString();
       delete ret._id;
-      ret.game = ret.game.toString();
+      ret.kind = ret.kind.toString();
       ret.owner = ret.owner.toString();
       return ret;
     },

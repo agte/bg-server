@@ -2,7 +2,7 @@ const { Schema } = require('mongoose');
 
 const ACLSchema = require('../../mongoose/ACLSchema.js');
 
-const GameSchema = new Schema({
+const GameKindSchema = new Schema({
   name: {
     type: String,
     unique: true,
@@ -42,4 +42,4 @@ const GameSchema = new Schema({
   },
 });
 
-module.exports = GameSchema;
+module.exports = GameKindSchema;

@@ -17,20 +17,20 @@ const patchSchema = require('./schemas/patch.json');
 class Match extends Service {
   constructor(options, app) {
     super(options, app);
-    this.Game = app.service('game');
+    this.GameKind = app.service('gameKind');
   }
 
   async _create(data, params) {
-    let game;
+    let kind;
     try {
-      game = await this.Game._get(data.game);
+      kind = await this.GameKind._get(data.kind);
     } catch (e) {
-      throw new BadRequest('Specified game does not exist');
+      throw new BadRequest('Specified kind does not exist');
     }
     return super._create({
       ...data,
-      minPlayers: game.minPlayers,
-      maxPlayers: game.maxPlayers,
+      minPlayers: kind.minPlayers,
+      maxPlayers: kind.maxPlayers,
     }, params);
   }
 
