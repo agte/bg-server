@@ -20,8 +20,8 @@ module.exports = async (app) => {
   });
   if (!TicTacToe) {
     await GameKind.create({
+      id: 'tic-tac-toe',
       name: 'Крестики-нолики',
-      engine: 'tic-tac-toe',
       minPlayers: 2,
       maxPlayers: 2,
     });
