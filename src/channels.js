@@ -1,8 +1,8 @@
 module.exports = function (app) {
-  if (typeof app.channel !== 'function') {
-    // If no real-time functionality has been configured just return
-    return;
-  }
+  // if (typeof app.channel !== 'function') {
+  //   // If no real-time functionality has been configured just return
+  //   return;
+  // }
 
   app.on('connection', (connection) => {
     app.channel('guest').join(connection);
@@ -22,7 +22,6 @@ module.exports = function (app) {
     }
   });
 
-  /* eslint-disable no-param-reassign */
   app.publish((data) => {
     let names = [];
     if (data.acl && data.acl.read) {
@@ -37,5 +36,4 @@ module.exports = function (app) {
     }
     return app.channel(...names);
   });
-  /* eslint-enable no-param-reassign */
 };
