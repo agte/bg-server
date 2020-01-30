@@ -37,6 +37,12 @@ class GameStatus {
     await gameDoc.save();
 
     this.Game.emit('patched', gameDoc.toJSON());
+    this.Game.emit('statusChanged', {
+      from: currentStatus,
+      to: newStatus,
+      document: gameDoc,
+      resource: gameDoc.toJSON(),
+    });
     return { value: newStatus };
   }
 }
