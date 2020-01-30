@@ -2,7 +2,7 @@ const assert = require('assert');
 const app = require('../../src/app.js');
 const reset = require('../reset.js');
 
-describe('Users', () => {
+describe('User', () => {
   const User = app.service('user');
   const UserRoles = app.service('user/:pid/roles');
 
@@ -11,7 +11,7 @@ describe('Users', () => {
 
   before(() => reset(app));
 
-  describe('Guest user', () => {
+  describe('Guest', () => {
     it('signs up', async () => {
       const userAInfo = {
         name: 'AAA',
@@ -38,17 +38,17 @@ describe('Users', () => {
       assert.equal(userA.roles.toString(), 'user');
     });
 
-    it('sees only himself in user list', async () => {
+    it('sees only himself in a user list', async () => {
       const { total, data: users } = await User.find({ provider: 'rest', user: userB });
       assert.equal(total, 1);
       assert.equal(users[0].id, userB.id);
     });
   });
 
-  describe('Admin user', () => {
+  describe('Admin', () => {
     const adminRequestOptions = {
       provider: 'rest',
-      user: { id: '0', roles: ['user', 'admin'] },
+      user: { id: '000000000000000000000000', roles: ['user', 'admin'] },
     };
 
     it('changes another user\'s password', async () => {
@@ -70,13 +70,13 @@ describe('Users', () => {
       assert.equal(total, 2);
     });
 
-    it('adds a role to user', async () => {
+    it('adds a role to a user', async () => {
       await UserRoles.create({ id: 'designer' }, { route: { pid: userB.id }, ...adminRequestOptions });
       userB = await User.get(userB.id);
       assert.equal(userB.roles.toString(), 'user,designer');
     });
 
-    it('removes a role from user', async () => {
+    it('removes a role from a user', async () => {
       await UserRoles.remove('designer', { route: { pid: userB.id }, ...adminRequestOptions });
       userB = await User.get(userB.id);
     });
