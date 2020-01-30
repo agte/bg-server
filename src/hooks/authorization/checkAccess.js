@@ -35,6 +35,7 @@ module.exports = (accessType = '') => async (context) => {
   }
 
   const resource = await service.get(id);
+  context.params.resource = resource;
 
   if (resource.owner && resource.owner === context.params.user.id) {
     return context;
