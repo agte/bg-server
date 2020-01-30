@@ -29,7 +29,7 @@ const PlayerSchema = new Schema({
 
 const GameSchema = new Schema({
   kind: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true,
   },
   status: {

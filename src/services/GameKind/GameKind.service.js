@@ -14,6 +14,9 @@ const createSchema = require('./schemas/create.json');
 const patchSchema = require('./schemas/patch.json');
 
 class GameKind extends Service {
+  async _create({ id, ...data }, params) {
+    return super._create({ _id: id, ...data }, params);
+  }
 }
 
 const hooks = {

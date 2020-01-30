@@ -4,9 +4,6 @@
     "name": {
       "type": "string"
     },
-    "engine": {
-      "type": "string"
-    },
     "minPlayers": {
       "type": "number"
     },

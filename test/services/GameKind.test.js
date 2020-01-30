@@ -28,8 +28,8 @@ describe('GameKind', () => {
     it('creates a new game gameKind', async () => {
       const gameKind = await GameKind.create(
         {
+          id: 'tic-tac-toe',
           name: 'Tic-Tac-Toe',
-          engine: 'tic-tac-toe',
           minPlayers: 2,
           maxPlayers: 2,
         },
@@ -53,7 +53,7 @@ describe('GameKind', () => {
 
     it('cannot patch a game gameKind he does not own', async () => {
       gameKindB = await GameKind.create(
-        { name: 'Chess', engine: 'chess' },
+        { id: 'chess', name: 'Chess' },
         { provider: 'test', user: designerB },
       );
       try {

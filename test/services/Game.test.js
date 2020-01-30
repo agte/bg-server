@@ -17,15 +17,15 @@ let gameKind;
 let game;
 let requestParams;
 
-describe('Gamees', () => {
+describe('Game', () => {
   before(async () => {
     await reset(app);
     userA = await User.create({ name: 'AAA', email: 'AAA@mail.com', password: '123123' });
     userB = await User.create({ name: 'BBB', email: 'BBB@mail.com', password: '123123' });
     userC = await User.create({ name: 'CCC', email: 'CCC@mail.com', password: '123123' });
     gameKind = await GameKind.create({
+      id: 'tic-tac-toe',
       name: 'Tic-Tac-Toe',
-      engine: 'tic-tac-toe',
       minPlayers: 2,
       maxPlayers: 2,
     });

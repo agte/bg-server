@@ -3,13 +3,12 @@ const { Schema } = require('mongoose');
 const ACLSchema = require('../../mongoose/ACLSchema.js');
 
 const GameKindSchema = new Schema({
+  _id: {
+    type: String,
+  },
   name: {
     type: String,
     unique: true,
-    required: true,
-  },
-  engine: {
-    type: String,
     required: true,
   },
   minPlayers: {
@@ -33,7 +32,7 @@ const GameKindSchema = new Schema({
     versionKey: false,
     /* eslint-disable no-param-reassign */
     transform: (doc, ret) => {
-      ret.id = ret._id.toString();
+      ret.id = ret._id;
       delete ret._id;
       ret.owner = ret.owner.toString();
       return ret;

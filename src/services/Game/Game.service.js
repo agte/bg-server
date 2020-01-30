@@ -21,16 +21,16 @@ class Game extends Service {
   }
 
   async _create(data, params) {
-    let kind;
+    let gameKind;
     try {
-      kind = await this.GameKind._get(data.kind);
+      gameKind = await this.GameKind.get(data.kind);
     } catch (e) {
       throw new BadRequest('Specified kind does not exist');
     }
     return super._create({
       ...data,
-      minPlayers: kind.minPlayers,
-      maxPlayers: kind.maxPlayers,
+      minPlayers: gameKind.minPlayers,
+      maxPlayers: gameKind.maxPlayers,
     }, params);
   }
 
