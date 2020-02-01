@@ -7,6 +7,7 @@ const GameKind = app.service('gameKind');
 const Game = app.service('game');
 const GamePlayers = app.service('game/:pid/players');
 const GameStatus = app.service('game/:pid/status');
+const GameState = app.service('game/:pid/state');
 
 const FAKE_ID = '000000000000000000000000';
 
@@ -125,11 +126,18 @@ describe('Game', () => {
         }
       });
 
-      it('launches his game after there\'s enough players', async () => {
+      it('launches his game', async () => {
         await GamePlayers.create({}, requestParams.userC);
         await GameStatus.update(null, { value: 'launched' }, requestParams.userA);
+
         game = await Game.get(game.id);
         assert.equal(game.status, 'launched');
+
+        const states = await GameState.find(requestParams.userA);
+        assert.equal(states.length, 1);
+        assert.equal(states[0].state.finished, false);
+        assert.ok(states[0].state.players);
+        assert.ok(states[0].state.cells);
       });
     });
 
@@ -142,6 +150,10 @@ describe('Game', () => {
           assert.equal(e.code, 409);
         }
       });
+    });
+
+    describe('Gameplay', () => {
+
     });
   });
 

@@ -17,32 +17,30 @@ class GameStatus {
   constructor(options, app) {
     this.options = options || {};
     this.Game = app.service('game');
+    this.GameState = app.service('game/:pid/state');
   }
 
-  async update(id, { value: newStatus }, { route }) {
-    const gameDoc = await this.Game.Model.findById(route.pid);
+  async update(id, { value: newStatus }, { route: { pid } }) {
+    let gameDoc = await this.Game.Model.findById(pid);
     const currentStatus = gameDoc.status;
 
     if (!allowedSwitches[currentStatus].includes(newStatus)) {
       throw new Conflict(`You cannot switch status from ${currentStatus} to ${newStatus}`);
     }
 
-    if (currentStatus === 'gathering' && newStatus === 'launched'
-      && gameDoc.players.length < gameDoc.minPlayers
-    ) {
-      throw new Conflict('There are not enough players');
+    if (newStatus === 'launched') {
+      if (gameDoc.players.length < gameDoc.minPlayers) {
+        throw new Conflict('There are not enough players');
+      }
+
+      await this.GameState.create({}, { route: { pid } });
+      gameDoc = await this.Game.Model.findById(pid); // refresh object from DB
     }
 
     gameDoc.status = newStatus;
     await gameDoc.save();
 
     this.Game.emit('patched', gameDoc.toJSON());
-    this.Game.emit('statusChanged', {
-      from: currentStatus,
-      to: newStatus,
-      document: gameDoc,
-      resource: gameDoc.toJSON(),
-    });
     return { value: newStatus };
   }
 }
