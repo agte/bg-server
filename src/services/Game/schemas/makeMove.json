@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "player": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "options": {
+      "type": "object"
+    }
+  },
+  "required": ["action"],
+  "additionalProperties": false
+}

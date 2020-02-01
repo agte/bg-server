@@ -152,8 +152,20 @@ describe('Game', () => {
       });
     });
 
-    describe('Gameplay', () => {
-
+    describe('First player', () => {
+      it('makes a move', async () => {
+        const result = await GameState.patch(
+          null,
+          {
+            player: 'x',
+            action: 'mark',
+            options: { id: '1:1' },
+          },
+          requestParams.userA,
+        );
+        assert.equal(result.id, 'x');
+        assert.ok(result.diff);
+      });
     });
   });
 
