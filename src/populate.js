@@ -15,9 +15,7 @@ module.exports = async (app) => {
 
   // Пока захардкодим крестики-нолики.
   // Затем будем задавать массив игр через конфигурационный файл.
-  const { data: [TicTacToe] } = await GameKind.find({
-    query: { name: 'Крестики-нолики', $limit: 1 },
-  });
+  const TicTacToe = await GameKind.Model.findById('tic-tac-toe');
   if (!TicTacToe) {
     await GameKind.create({
       id: 'tic-tac-toe',
