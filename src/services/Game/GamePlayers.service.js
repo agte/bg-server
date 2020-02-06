@@ -1,3 +1,4 @@
+const { disallow } = require('feathers-hooks-common');
 const { Forbidden, Conflict, NotFound } = require('@feathersjs/errors');
 
 const checkAccess = require('../../hooks/authorization/checkAccess.js');
@@ -67,6 +68,9 @@ const hooks = {
     ],
     remove: [
       checkAccess('read'),
+    ],
+    patch: [
+      disallow('external'),
     ],
   },
 };

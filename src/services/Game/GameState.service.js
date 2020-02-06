@@ -19,38 +19,6 @@ const loadEngine = async (name) => {
   return (await import(engines[name])).default;
 };
 
-/**
- * @param {Array.<Object>} gamePlayers [{ id: ..., user: ..., name: ... }, ...]
- * @param {Array.<Object>} innerPlayers [{ id: ..., score: ... }]
- * @return {Map.<string, Array.<string>>} { userId1: [innerPlayerId1, innerPlayerId5], userId2: [...], ... }
- */
-/* eslint-disable arrow-body-style */
-const mapUsersToPlayers = (gamePlayers, innerPlayers) => {
-  return gamePlayers.reduce((map, gamePlayer, index) => {
-    const innerPlayer = innerPlayers[index];
-    if (!innerPlayer) {
-      // It will never happen until someone breaks DB
-      return map;
-    }
-
-    if (!map.has(gamePlayer.user)) {
-      map.set(gamePlayer.user, []);
-    }
-    map.get(gamePlayer.user).push(innerPlayer.id);
-    return map;
-  }, new Map());
-};
-/* eslint-enable arrow-body-style */
-
-const getUserStates = (userId, gamePlayers, gameMachine) => {
-  const innerPlayers = gameMachine.players.toArray();
-  const fullState = gameMachine.state;
-
-  const userMap = mapUsersToPlayers(gamePlayers, innerPlayers);
-  const playersIds = userMap.get(userId);
-  return playersIds.map((playerId) => ({ id: playerId, state: fullState.view(playerId) }));
-};
-
 class GameState {
   constructor(options, app) {
     this.options = options || {};
@@ -75,26 +43,40 @@ class GameState {
     const EngineClass = await loadEngine(game.kind);
     const gameMachine = new EngineClass(JSON.parse(stateDoc.data));
 
-    const userStates = getUserStates(userId, game.players, gameMachine);
-    return userStates;
+    const fullState = gameMachine.state;
+    const views = game.players
+      .filter((player) => player.user === userId)
+      .map((player) => ({
+        id: player.internalId,
+        state: fullState.view(player.internalId),
+      }));
+    return views;
   }
 
   async create(emptyData, { route: { pid } }) {
-    const game = await this.Game.get(pid);
+    const gameDoc = await this.Game.Model.findById(pid);
 
-    const EngineClass = await loadEngine(game.kind);
+    const EngineClass = await loadEngine(gameDoc.kind);
     const gameMachine = new EngineClass();
 
     const stateDoc = new this.Model({
-      _id: game.id,
+      _id: gameDoc.id,
       data: JSON.stringify(gameMachine),
     });
     await stateDoc.save();
 
+    Array
+      .from(gameMachine.players.keys())
+      .forEach((internalPlayerId, index) => {
+        gameDoc.players[index].internalId = internalPlayerId;
+      });
+    gameDoc.markModified('players');
+    await gameDoc.save();
+
     return {};
   }
 
-  async patch(nullId, { player: innerPlayerId, action, options = null }, { route: { pid }, user: { id: userId } }) {
+  async patch(nullId, { player: internalPlayerId, action, options = null }, { route: { pid }, user: { id: userId } }) {
     const game = await this.Game.get(pid);
 
     const isUserAPlayer = game.players.some((player) => player.user === userId);
@@ -110,32 +92,25 @@ class GameState {
     const EngineClass = await loadEngine(game.kind);
     const gameMachine = new EngineClass(JSON.parse(stateDoc.data));
 
-    const index = gameMachine.players.toArray().findIndex((player) => player.id === innerPlayerId);
-    if (index === -1) {
+    const player = game.players.find((p) => p.internalId === internalPlayerId);
+    if (!player) {
       throw new BadRequest('Player unknown');
     }
-    if (!game.players[index]) {
-      throw new Error('Something strange happend');
-    }
-    if (game.players[index].user !== userId) {
+    if (player.user !== userId) {
       throw new Forbidden('You cannot move for this player');
     }
 
     let diff;
     try {
-      diff = gameMachine.move(innerPlayerId, action, options || {});
+      diff = gameMachine.move(player.internalId, action, options || {});
     } catch (e) {
       throw new BadRequest(`Gameplay error: ${e.message}`);
     }
-    this.emit('move', {
-      game,
-      gameMachine,
-      diff,
-    });
+    this.emit('move', { game, diff });
 
     return {
-      id: innerPlayerId,
-      diff: diff.view(innerPlayerId),
+      id: player.internalId,
+      diff: diff.view(player.internalId),
     };
   }
 }
@@ -167,21 +142,18 @@ module.exports = function (app) {
   service.publish('created', () => null);
   service.publish('patched', () => null);
 
-  service.publish('move', ({ game, gameMachine, diff }) => {
-    const userMap = mapUsersToPlayers(game.players, gameMachine.players.toArray());
+  service.publish('move', ({ game, diff }) => {
     const channels = [];
 
-    console.log(userMap);
-    userMap.forEach((playersIds, userId) => {
-      playersIds.forEach((playerId) => {
-        const channel = app.channel(userId).send({
-          id: playerId,
-          pid: game.id,
-          diff: diff.view(playerId),
-        });
-        channels.push(channel);
+    game.players.forEach((player) => {
+      const channel = app.channel(player.user).send({
+        id: player.internalId,
+        pid: game.id,
+        diff: diff.view(player.internalId),
       });
+      channels.push(channel);
     });
+
     return channels;
   });
 };

@@ -10,6 +10,9 @@ const PlayerSchema = new Schema({
     type: String,
     required: true,
   },
+  internalId: {
+    type: String,
+  },
 }, {
   _id: true,
   id: true,
