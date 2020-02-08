@@ -44,7 +44,7 @@ class Game extends Service {
 
   async remove(id, params) {
     const resource = params.resource || await this.get(id);
-    if (resource.status === 'launched' || resource.status === 'finished') {
+    if (resource.status !== 'draft' && resource.status !== 'aborted') {
       throw new Conflict(`You cannot remove a game in "${resource.status}" status`);
     }
     return super.remove(id, params);

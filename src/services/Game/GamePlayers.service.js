@@ -1,4 +1,3 @@
-const { disallow } = require('feathers-hooks-common');
 const { Forbidden, Conflict, NotFound } = require('@feathersjs/errors');
 
 const checkAccess = require('../../hooks/authorization/checkAccess.js');
@@ -9,8 +8,7 @@ const addPlayerSchema = require('./schemas/addPlayer.json');
 class GamePlayers {
   constructor(options, app) {
     this.options = options || {};
-    this.Game = app.service('game');
-    this.User = app.service('user');
+    this.Game = app.service(options.parent);
   }
 
   async create(data, { route, user }) {
@@ -25,11 +23,12 @@ class GamePlayers {
       throw new Conflict('Maximum number of players reached');
     }
 
-    gameDoc.players.push({ user: user.id, name: user.name });
+    const playerDoc = gameDoc.players.create({ user: user.id, name: user.name });
+    gameDoc.players.push(playerDoc);
     await gameDoc.save();
 
     this.Game.emit('patched', gameDoc.toJSON());
-    return gameDoc.players[gameDoc.players.length - 1];
+    return playerDoc;
   }
 
   async remove(id, { route, user }) {
@@ -40,37 +39,31 @@ class GamePlayers {
       throw new Conflict('Leaving a game is not allowed now');
     }
 
-    const player = gameDoc.players.id(id);
-    if (!player) {
+    const playerDoc = gameDoc.players.id(id);
+    if (!playerDoc) {
       throw new NotFound('Player not found');
     }
 
-    if (user.id === gameDoc.owner.toString() && user.id !== player.user.toString()) {
+    if (user.id === gameDoc.owner.toString() && user.id !== playerDoc.user.toString()) {
       throw new Forbidden('You cannot delete anyone except yourself from the game');
     }
 
-    player.remove();
+    playerDoc.remove();
     await gameDoc.save();
 
     this.Game.emit('patched', gameDoc.toJSON());
-    return { id };
+    return playerDoc;
   }
 }
 
 const hooks = {
   before: {
-    find: [
-      checkAccess(),
-    ],
     create: [
       checkAccess('read'),
       validate(addPlayerSchema),
     ],
     remove: [
       checkAccess('read'),
-    ],
-    patch: [
-      disallow('external'),
     ],
   },
 };

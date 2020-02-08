@@ -20,8 +20,8 @@ class GameStatus {
     this.Game = app.service('game');
     this.GameState = app.service('game/:pid/state');
 
-    this.GameState.on('finished', ({ pid }) => {
-      this.update(null, { value: 'finished' }, { route: { pid } })
+    this.Game.on('gameplayFinished', ({ id }) => {
+      this.update(null, { value: 'finished' }, { route: { pid: id } })
         .catch((e) => {
           logger.error(e);
         });
@@ -41,8 +41,10 @@ class GameStatus {
         throw new Conflict('There are not enough players');
       }
 
+      // TODO Пересмотреть это место.
       await this.GameState.create({}, { route: { pid } });
-      gameDoc = await this.Game.Model.findById(pid); // refresh object from DB
+      // заново считываем из БД, так как GameState мог там что-то поменять.
+      gameDoc = await this.Game.Model.findById(pid);
     }
 
     gameDoc.status = newStatus;
