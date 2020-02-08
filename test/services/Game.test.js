@@ -156,11 +156,7 @@ describe('Game', () => {
       it('makes a move', async () => {
         const result = await GameState.patch(
           null,
-          {
-            player: 'x',
-            action: 'mark',
-            options: { id: '1:1' },
-          },
+          { player: 'x', action: 'mark', options: { id: '1:1' } },
           requestParams.userA,
         );
         assert.equal(result.id, 'x');
@@ -170,12 +166,44 @@ describe('Game', () => {
   });
 
   describe('Finished', () => {
-    describe('Owner', () => {
-      it('owner finishes his game', async () => {
-        await GameStatus.update(null, { value: 'finished' }, requestParams.userA);
-        game = await Game.get(game.id);
-        assert.equal(game.status, 'finished');
+    it('a game comes to end', async () => {
+      await GameState.patch(
+        null,
+        { player: 'o', action: 'mark', options: { id: '1:2' } },
+        requestParams.userC,
+      );
+      await GameState.patch(
+        null,
+        { player: 'x', action: 'mark', options: { id: '0:1' } },
+        requestParams.userA,
+      );
+      await GameState.patch(
+        null,
+        { player: 'o', action: 'mark', options: { id: '2:1' } },
+        requestParams.userC,
+      );
+      await GameState.patch(
+        null,
+        { player: 'x', action: 'mark', options: { id: '0:2' } },
+        requestParams.userA,
+      );
+      await GameState.patch(
+        null,
+        { player: 'o', action: 'mark', options: { id: '2:0' } },
+        requestParams.userC,
+      );
+      Game.once('patched', (resource) => {
+        if (resource.status === 'finished') {
+          assert.ok(true);
+        } else {
+          assert.fail();
+        }
       });
+      await GameState.patch(
+        null,
+        { player: 'x', action: 'mark', options: { id: '0:0' } },
+        requestParams.userA,
+      );
     });
   });
 

@@ -25,6 +25,7 @@ class GameState {
     this.Model = this.options.Model;
     this.events = ['move'];
     this.Game = app.service('game');
+    this.GameStatus = app.service('game/:pid/status');
   }
 
   async find({ route: { pid }, user: { id: userId } }) {
@@ -106,7 +107,15 @@ class GameState {
     } catch (e) {
       throw new BadRequest(`Gameplay error: ${e.message}`);
     }
+
+    stateDoc.data = JSON.stringify(gameMachine);
+    await stateDoc.save();
+
     this.emit('move', { game, diff });
+
+    if (gameMachine.finished) {
+      await this.emit('finished', { pid });
+    }
 
     return {
       id: player.internalId,

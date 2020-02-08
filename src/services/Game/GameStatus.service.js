@@ -2,6 +2,7 @@ const { Conflict } = require('@feathersjs/errors');
 
 const checkAccess = require('../../hooks/authorization/checkAccess.js');
 const validate = require('../../hooks/validate.js');
+const logger = require('../../logger');
 
 const changeStatusSchema = require('./schemas/changeStatus.json');
 
@@ -18,6 +19,13 @@ class GameStatus {
     this.options = options || {};
     this.Game = app.service('game');
     this.GameState = app.service('game/:pid/state');
+
+    this.GameState.on('finished', ({ pid }) => {
+      this.update(null, { value: 'finished' }, { route: { pid } })
+        .catch((e) => {
+          logger.error(e);
+        });
+    });
   }
 
   async update(id, { value: newStatus }, { route: { pid } }) {
