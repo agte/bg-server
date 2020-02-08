@@ -20,34 +20,34 @@ class Game extends Service {
     this.GameKind = app.service('gameKind');
   }
 
-  async _create(data, params) {
+  async create(data, params) {
     let gameKind;
     try {
       gameKind = await this.GameKind.get(data.kind);
     } catch (e) {
       throw new BadRequest('Specified kind does not exist');
     }
-    return super._create({
+    return super.create({
       ...data,
       minPlayers: gameKind.minPlayers,
       maxPlayers: gameKind.maxPlayers,
     }, params);
   }
 
-  async _patch(id, data, params) {
+  async patch(id, data, params) {
     const resource = params.resource || await this.get(id);
     if (resource.status !== 'draft') {
       throw new Conflict(`You cannot update a game in "${resource.status}" status`);
     }
-    return super._patch(id, data, params);
+    return super.patch(id, data, params);
   }
 
-  async _remove(id, params) {
+  async remove(id, params) {
     const resource = params.resource || await this.get(id);
     if (resource.status === 'launched' || resource.status === 'finished') {
       throw new Conflict(`You cannot remove a game in "${resource.status}" status`);
     }
-    return super._remove(id, params);
+    return super.remove(id, params);
   }
 }
 
