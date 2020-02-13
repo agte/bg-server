@@ -7,7 +7,7 @@
     "action": {
       "type": "string"
     },
-    "options": {
+    "params": {
       "type": "object"
     }
   },

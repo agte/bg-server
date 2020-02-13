@@ -43,7 +43,7 @@ class GameState {
     const EngineClass = await loadEngine(game.kind);
     const gameMachine = new EngineClass(JSON.parse(stateDoc.data));
 
-    const fullState = gameMachine.state;
+    const fullState = gameMachine.getState();
     const views = game.players
       .filter((player) => player.user === userId)
       .map((player) => ({
@@ -57,7 +57,7 @@ class GameState {
     const gameDoc = await this.Game.Model.findById(pid);
 
     const EngineClass = await loadEngine(gameDoc.kind);
-    const gameMachine = new EngineClass();
+    const gameMachine = EngineClass.create();
 
     const stateDoc = new this.Model({
       _id: gameDoc.id,
@@ -76,7 +76,7 @@ class GameState {
     return {};
   }
 
-  async patch(nullId, { player: internalPlayerId, action, options = null }, { route: { pid }, user: { id: userId } }) {
+  async patch(nullId, { player: internalPlayerId, action, params = null }, { route: { pid }, user: { id: userId } }) {
     const game = await this.Game.get(pid);
 
     const isUserAPlayer = game.players.some((player) => player.user === userId);
@@ -102,7 +102,7 @@ class GameState {
 
     let diff;
     try {
-      diff = gameMachine.move(player.internalId, action, options || {});
+      diff = gameMachine.move(player.internalId, action, params || {});
     } catch (e) {
       throw new BadRequest(`Gameplay error: ${e.message}`);
     }

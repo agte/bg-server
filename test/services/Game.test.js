@@ -135,9 +135,7 @@ describe('Game', () => {
 
         const states = await GameState.find(requestParams.userA);
         assert.equal(states.length, 1);
-        assert.equal(states[0].state.finished, false);
-        assert.ok(states[0].state.players);
-        assert.ok(states[0].state.cells);
+        assert.ok(states[0].state);
       });
     });
 
@@ -156,7 +154,7 @@ describe('Game', () => {
       it('makes a move', async () => {
         const result = await GameState.patch(
           null,
-          { player: 'x', action: 'mark', options: { id: '1:1' } },
+          { player: 'x', action: 'mark', params: { id: '4' } },
           requestParams.userA,
         );
         assert.equal(result.id, 'x');
@@ -169,27 +167,27 @@ describe('Game', () => {
     it('a game comes to end', async () => {
       await GameState.patch(
         null,
-        { player: 'o', action: 'mark', options: { id: '1:2' } },
+        { player: 'o', action: 'mark', params: { id: '5' } },
         requestParams.userC,
       );
       await GameState.patch(
         null,
-        { player: 'x', action: 'mark', options: { id: '0:1' } },
+        { player: 'x', action: 'mark', params: { id: '1' } },
         requestParams.userA,
       );
       await GameState.patch(
         null,
-        { player: 'o', action: 'mark', options: { id: '2:1' } },
+        { player: 'o', action: 'mark', params: { id: '7' } },
         requestParams.userC,
       );
       await GameState.patch(
         null,
-        { player: 'x', action: 'mark', options: { id: '0:2' } },
+        { player: 'x', action: 'mark', params: { id: '2' } },
         requestParams.userA,
       );
       await GameState.patch(
         null,
-        { player: 'o', action: 'mark', options: { id: '2:0' } },
+        { player: 'o', action: 'mark', params: { id: '6' } },
         requestParams.userC,
       );
       Game.once('patched', (resource) => {
@@ -201,7 +199,7 @@ describe('Game', () => {
       });
       await GameState.patch(
         null,
-        { player: 'x', action: 'mark', options: { id: '0:0' } },
+        { player: 'x', action: 'mark', params: { id: '0' } },
         requestParams.userA,
       );
     });
