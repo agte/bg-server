@@ -65,10 +65,10 @@ class GameState {
     });
     await stateDoc.save();
 
-    Array
-      .from(gameMachine.players.keys())
-      .forEach((internalPlayerId, index) => {
-        gameDoc.players[index].internalId = internalPlayerId;
+    gameMachine
+      .getPlayers()
+      .forEach((internalPlayer, index) => {
+        gameDoc.players[index].internalId = internalPlayer.id;
       });
     gameDoc.markModified('players');
     await gameDoc.save();

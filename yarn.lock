@@ -8,9 +8,9 @@
   dependencies:
     "@agte/type" "git+https://github.com/agte/type.git#2.0.0"
 
-"@agte/bg-tic-tac-toe@https://github.com/agte/bg-tic-tac-toe#2.0.0":
-  version "2.0.0"
-  resolved "https://github.com/agte/bg-tic-tac-toe#53f60abbc3403ed7622c0b0cf38e9c779440e3f3"
+"@agte/bg-tic-tac-toe@https://github.com/agte/bg-tic-tac-toe#2.0.1":
+  version "2.0.1"
+  resolved "https://github.com/agte/bg-tic-tac-toe#cf8587ce720bc76d0f8f8d1122a06bcd6532964a"
   dependencies:
     "@agte/bg-engine" "git+https://github.com/agte/bg-engine.git#3.0.0"
     "@agte/type" "git+https://github.com/agte/type.git#2.0.0"
