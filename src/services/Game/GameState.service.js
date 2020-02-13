@@ -113,7 +113,18 @@ class GameState {
     this.emit('move', { game, diff });
 
     if (gameMachine.finished) {
-      await this.Game.emit('gameplayFinished', { id: pid });
+      const scoreMap = Object.fromEntries(
+        gameMachine.getPlayers().map((p) => [p.id, p.score]),
+      );
+
+      const gameDoc = await this.Game.Model.findById(pid);
+      gameDoc.players.forEach((p) => {
+        p.score = scoreMap[p.internalId]; // eslint-disable-line no-param-reassign
+      });
+      gameDoc.markModified('players');
+      await gameDoc.save();
+
+      this.Game.emit('gameplayFinished', { id: pid });
     }
 
     return {

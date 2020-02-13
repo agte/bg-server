@@ -13,6 +13,9 @@ const PlayerSchema = new Schema({
   internalId: {
     type: String,
   },
+  score: {
+    type: Number,
+  },
 }, {
   _id: true,
   id: true,
