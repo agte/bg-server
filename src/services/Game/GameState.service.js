@@ -23,11 +23,13 @@ class GameState {
   constructor(options, app) {
     this.options = options || {};
     this.Model = this.options.Model;
-    this.events = ['move'];
+    this.events = ['ready', 'move'];
     this.Game = app.service('game');
   }
 
-  async find({ route: { pid }, user: { id: userId } }) {
+  async find(params) {
+    const { route: { pid }, user: { id: userId } } = params;
+
     const game = await this.Game.get(pid);
 
     const isUserAPlayer = game.players.some((player) => player.user === userId);
@@ -55,6 +57,7 @@ class GameState {
 
   async create(emptyData, { route: { pid } }) {
     const gameDoc = await this.Game.Model.findById(pid);
+    const game = gameDoc.toJSON();
 
     const EngineClass = await loadEngine(gameDoc.kind);
     const engine = EngineClass.create();
@@ -73,11 +76,21 @@ class GameState {
     gameDoc.markModified('players');
     await gameDoc.save();
 
+    this.emit('ready', { game, state: engine.getState() });
+
     return {};
   }
 
-  async patch(nullId, { player: internalPlayerId, action, params = null }, { route: { pid }, user: { id: userId } }) {
-    const game = await this.Game.get(pid);
+  async patch(nullId, data, params) {
+    const {
+      player: internalPlayerId,
+      action,
+      params: actionParams,
+    } = data;
+    const { route: { pid }, user: { id: userId } } = params;
+
+    const gameDoc = await this.Game.Model.findById(pid);
+    const game = gameDoc.toJSON();
 
     const isUserAPlayer = game.players.some((player) => player.user === userId);
     if (!isUserAPlayer) {
@@ -102,7 +115,7 @@ class GameState {
 
     let diff;
     try {
-      diff = engine.move(player.internalId, action, params || {});
+      diff = engine.move(player.internalId, action, actionParams || {});
     } catch (e) {
       throw new BadRequest(`Gameplay error: ${e.message}`);
     }
@@ -117,7 +130,6 @@ class GameState {
         engine.getPlayers().map((p) => [p.id, p.score]),
       );
 
-      const gameDoc = await this.Game.Model.findById(pid);
       gameDoc.players.forEach((p) => {
         p.score = scoreMap[p.internalId]; // eslint-disable-line no-param-reassign
       });
@@ -157,6 +169,21 @@ module.exports = function (app) {
 
   service.publish('created', () => null);
   service.publish('patched', () => null);
+
+  service.publish('ready', ({ game, state }) => {
+    const channels = [];
+
+    game.players.forEach((player) => {
+      const channel = app.channel(player.user).send({
+        id: player.internalId,
+        pid: game.id,
+        state: state.view(player.internalId),
+      });
+      channels.push(channel);
+    });
+
+    return channels;
+  });
 
   service.publish('move', ({ game, diff }) => {
     const channels = [];
