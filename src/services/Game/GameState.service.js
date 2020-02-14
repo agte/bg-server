@@ -57,7 +57,6 @@ class GameState {
 
   async create(emptyData, { route: { pid } }) {
     const gameDoc = await this.Game.Model.findById(pid);
-    const game = gameDoc.toJSON();
 
     const EngineClass = await loadEngine(gameDoc.kind);
     const engine = EngineClass.create();
@@ -76,7 +75,10 @@ class GameState {
     gameDoc.markModified('players');
     await gameDoc.save();
 
-    this.emit('ready', { game, state: engine.getState() });
+    this.emit('ready', {
+      game: gameDoc.toJSON(),
+      state: engine.getState(),
+    });
 
     return {};
   }
