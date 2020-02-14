@@ -32,7 +32,7 @@
     "mocha": "NODE_ENV=test mocha --recursive --bail --exit ./test/*.test.js ./test/**/*.test.js"
   },
   "dependencies": {
-    "@agte/bg-tic-tac-toe": "https://github.com/agte/bg-tic-tac-toe#2.0.1",
+    "@agte/bg-tic-tac-toe": "https://github.com/agte/bg-tic-tac-toe#2.0.2",
     "@feathersjs/authentication": "^4.3.11",
     "@feathersjs/authentication-local": "^4.3.11",
     "@feathersjs/authentication-oauth": "^4.3.11",

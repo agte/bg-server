@@ -16,6 +16,14 @@
     "@agte/type" "git+https://github.com/agte/type.git#2.0.0"
     ajv "^6.11.0"
 
+"@agte/bg-tic-tac-toe@https://github.com/agte/bg-tic-tac-toe#2.0.2":
+  version "2.0.2"
+  resolved "https://github.com/agte/bg-tic-tac-toe#a2705046d79f283f5b03af9e41c1bfbf7e2ca774"
+  dependencies:
+    "@agte/bg-engine" "git+https://github.com/agte/bg-engine.git#3.0.0"
+    "@agte/type" "git+https://github.com/agte/type.git#2.0.0"
+    ajv "^6.11.0"
+
 "@agte/type@git+https://github.com/agte/type.git#2.0.0":
   version "2.0.0"
   resolved "git+https://github.com/agte/type.git#0fcffc470d1284aa438107a320c856b473b4bc45"
