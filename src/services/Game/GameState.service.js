@@ -19,6 +19,20 @@ const loadEngine = async (name) => {
   return (await import(engines[name])).default;
 };
 
+/**
+ * @function getUserViews
+ * @param {string} userId
+ * @param {Game} game
+ * @param {State} state
+ * @returns {Array.<{ id: string, state: object }>}
+ */
+const getUserViews = (userId, game, state) => game.players
+  .filter((player) => player.user === userId)
+  .map((player) => ({
+    id: player.internalId,
+    state: state.view(player.internalId),
+  }));
+
 class GameState {
   constructor(options, app) {
     this.options = options || {};
@@ -46,12 +60,7 @@ class GameState {
     const engine = new EngineClass(JSON.parse(stateDoc.data));
 
     const fullState = engine.getState();
-    const views = game.players
-      .filter((player) => player.user === userId)
-      .map((player) => ({
-        id: player.internalId,
-        state: fullState.view(player.internalId),
-      }));
+    const views = getUserViews(userId, game, fullState);
     return views;
   }
 
@@ -121,11 +130,10 @@ class GameState {
     } catch (e) {
       throw new BadRequest(`Gameplay error: ${e.message}`);
     }
-
     stateDoc.data = JSON.stringify(engine);
     await stateDoc.save();
 
-    this.emit('move', { game, diff });
+    this.emit('move', { game, state: diff });
 
     if (engine.finished) {
       const scoreMap = Object.fromEntries(
@@ -173,32 +181,32 @@ module.exports = function (app) {
   service.publish('patched', () => null);
 
   service.publish('ready', ({ game, state }) => {
-    const channels = [];
+    const channels = new Map();
 
     game.players.forEach((player) => {
-      const channel = app.channel(player.user).send({
-        id: player.internalId,
-        pid: game.id,
-        state: state.view(player.internalId),
-      });
-      channels.push(channel);
+      if (channels.has(player.user)) {
+        return;
+      }
+      const views = getUserViews(player.user, game, state);
+      const channel = app.channel(player.user).send({ pid: game.id, views });
+      channels.set(player.user, channel);
     });
 
-    return channels;
+    return Array.from(channels.values());
   });
 
-  service.publish('move', ({ game, diff }) => {
-    const channels = [];
+  service.publish('move', ({ game, state }) => {
+    const channels = new Map();
 
     game.players.forEach((player) => {
-      const channel = app.channel(player.user).send({
-        id: player.internalId,
-        pid: game.id,
-        diff: diff.view(player.internalId),
-      });
-      channels.push(channel);
+      if (channels.has(player.user)) {
+        return;
+      }
+      const views = getUserViews(player.user, game, state);
+      const channel = app.channel(player.user).send({ pid: game.id, views });
+      channels.set(player.user, channel);
     });
 
-    return channels;
+    return Array.from(channels.values());
   });
 };
