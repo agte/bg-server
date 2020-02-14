@@ -43,7 +43,7 @@ const GameSchema = new Schema({
     enum: [
       'draft',
       'gathering',
-      'launched',
+      'running',
       'finished',
       'aborted',
     ],

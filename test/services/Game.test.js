@@ -119,7 +119,7 @@ describe('Game', () => {
     describe('Owner', () => {
       it('cannot launch his game until there\'s enought players', async () => {
         try {
-          await GameStatus.update(null, { value: 'launched' }, requestParams.userA);
+          await GameStatus.update(null, { value: 'running' }, requestParams.userA);
           assert.fail();
         } catch (e) {
           assert.equal(e.code, 409);
@@ -128,10 +128,10 @@ describe('Game', () => {
 
       it('launches his game', async () => {
         await GamePlayers.create({}, requestParams.userC);
-        await GameStatus.update(null, { value: 'launched' }, requestParams.userA);
+        await GameStatus.update(null, { value: 'running' }, requestParams.userA);
 
         game = await Game.get(game.id);
-        assert.equal(game.status, 'launched');
+        assert.equal(game.status, 'running');
 
         const states = await GameState.find(requestParams.userA);
         assert.equal(states.length, 1);
@@ -140,7 +140,7 @@ describe('Game', () => {
     });
 
     describe('Another user', () => {
-      it('can\'t leave a launched game', async () => {
+      it('can\'t leave a running game', async () => {
         try {
           await GamePlayers.remove(game.players[1].id, requestParams.userC);
           assert.fail();
@@ -216,7 +216,7 @@ describe('Game', () => {
       await GameStatus.update(null, { value: 'gathering' }, requestParams2.userA);
       await GamePlayers.create({}, requestParams2.userA);
       await GamePlayers.create({}, requestParams2.userB);
-      await GameStatus.update(null, { value: 'launched' }, requestParams2.userA);
+      await GameStatus.update(null, { value: 'running' }, requestParams2.userA);
       await GameStatus.update(null, { value: 'aborted' }, requestParams2.userA);
     });
   });

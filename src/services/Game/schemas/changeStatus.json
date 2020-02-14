@@ -6,7 +6,7 @@
       "enum": [
         "draft",
         "gathering",
-        "launched",
+        "running",
         "finished",
         "aborted"
       ]
