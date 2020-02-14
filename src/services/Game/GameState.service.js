@@ -41,9 +41,9 @@ class GameState {
     }
 
     const EngineClass = await loadEngine(game.kind);
-    const gameMachine = new EngineClass(JSON.parse(stateDoc.data));
+    const engine = new EngineClass(JSON.parse(stateDoc.data));
 
-    const fullState = gameMachine.getState();
+    const fullState = engine.getState();
     const views = game.players
       .filter((player) => player.user === userId)
       .map((player) => ({
@@ -57,15 +57,15 @@ class GameState {
     const gameDoc = await this.Game.Model.findById(pid);
 
     const EngineClass = await loadEngine(gameDoc.kind);
-    const gameMachine = EngineClass.create();
+    const engine = EngineClass.create();
 
     const stateDoc = new this.Model({
       _id: gameDoc.id,
-      data: JSON.stringify(gameMachine),
+      data: JSON.stringify(engine),
     });
     await stateDoc.save();
 
-    gameMachine
+    engine
       .getPlayers()
       .forEach((internalPlayer, index) => {
         gameDoc.players[index].internalId = internalPlayer.id;
@@ -90,7 +90,7 @@ class GameState {
     }
 
     const EngineClass = await loadEngine(game.kind);
-    const gameMachine = new EngineClass(JSON.parse(stateDoc.data));
+    const engine = new EngineClass(JSON.parse(stateDoc.data));
 
     const player = game.players.find((p) => p.internalId === internalPlayerId);
     if (!player) {
@@ -102,19 +102,19 @@ class GameState {
 
     let diff;
     try {
-      diff = gameMachine.move(player.internalId, action, params || {});
+      diff = engine.move(player.internalId, action, params || {});
     } catch (e) {
       throw new BadRequest(`Gameplay error: ${e.message}`);
     }
 
-    stateDoc.data = JSON.stringify(gameMachine);
+    stateDoc.data = JSON.stringify(engine);
     await stateDoc.save();
 
     this.emit('move', { game, diff });
 
-    if (gameMachine.finished) {
+    if (engine.finished) {
       const scoreMap = Object.fromEntries(
-        gameMachine.getPlayers().map((p) => [p.id, p.score]),
+        engine.getPlayers().map((p) => [p.id, p.score]),
       );
 
       const gameDoc = await this.Game.Model.findById(pid);
@@ -127,10 +127,7 @@ class GameState {
       this.Game.emit('gameplayFinished', { id: pid });
     }
 
-    return {
-      id: player.internalId,
-      diff: diff.view(player.internalId),
-    };
+    return {};
   }
 }
 

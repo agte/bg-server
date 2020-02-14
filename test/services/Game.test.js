@@ -133,9 +133,9 @@ describe('Game', () => {
         game = await Game.get(game.id);
         assert.equal(game.status, 'running');
 
-        const states = await GameState.find(requestParams.userA);
-        assert.equal(states.length, 1);
-        assert.ok(states[0].state);
+        const views = await GameState.find(requestParams.userA);
+        assert.equal(views.length, 1);
+        assert.ok(views[0].state);
       });
     });
 
@@ -152,13 +152,13 @@ describe('Game', () => {
 
     describe('First player', () => {
       it('makes a move', async () => {
-        const result = await GameState.patch(
+        await GameState.patch(
           null,
           { player: 'x', action: 'mark', params: { id: '4' } },
           requestParams.userA,
         );
-        assert.equal(result.id, 'x');
-        assert.ok(result.diff);
+        const views = await GameState.find(requestParams.userA);
+        assert.equal(views[0].state.cells[4], 'x');
       });
     });
   });
