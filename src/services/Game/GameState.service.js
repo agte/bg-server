@@ -24,13 +24,13 @@ const loadEngine = async (name) => {
  * @param {string} userId
  * @param {Game} game
  * @param {State} state
- * @returns {Array.<{ id: string, state: object }>}
+ * @returns {Array.<{ id: string, data: object }>}
  */
 const getUserViews = (userId, game, state) => game.players
   .filter((player) => player.user === userId)
   .map((player) => ({
     id: player.internalId,
-    state: state.view(player.internalId),
+    data: state.view(player.internalId),
   }));
 
 class GameState {

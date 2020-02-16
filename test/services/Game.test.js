@@ -117,7 +117,7 @@ describe('Game', () => {
 
   describe('Launched', () => {
     describe('Owner', () => {
-      it('cannot launch his game until there\'s enought players', async () => {
+      it('cannot run his game until there\'s enought players', async () => {
         try {
           await GameStatus.update(null, { value: 'running' }, requestParams.userA);
           assert.fail();
@@ -126,7 +126,7 @@ describe('Game', () => {
         }
       });
 
-      it('launches his game', async () => {
+      it('runs his game', async () => {
         await GamePlayers.create({}, requestParams.userC);
         await GameStatus.update(null, { value: 'running' }, requestParams.userA);
 
@@ -135,7 +135,8 @@ describe('Game', () => {
 
         const views = await GameState.find(requestParams.userA);
         assert.equal(views.length, 1);
-        assert.ok(views[0].state);
+        assert.equal(views[0].id, 'x');
+        assert.ok(views[0].data);
       });
     });
 
@@ -158,7 +159,7 @@ describe('Game', () => {
           requestParams.userA,
         );
         const views = await GameState.find(requestParams.userA);
-        assert.equal(views[0].state.cells[4], 'x');
+        assert.equal(views[0].data.cells[4], 'x');
       });
     });
   });
