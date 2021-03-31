@@ -8,14 +8,6 @@
   dependencies:
     "@agte/type" "git+https://github.com/agte/type.git#2.0.0"
 
-"@agte/bg-tic-tac-toe@https://github.com/agte/bg-tic-tac-toe#2.0.1":
-  version "2.0.1"
-  resolved "https://github.com/agte/bg-tic-tac-toe#cf8587ce720bc76d0f8f8d1122a06bcd6532964a"
-  dependencies:
-    "@agte/bg-engine" "git+https://github.com/agte/bg-engine.git#3.0.0"
-    "@agte/type" "git+https://github.com/agte/type.git#2.0.0"
-    ajv "^6.11.0"
-
 "@agte/bg-tic-tac-toe@https://github.com/agte/bg-tic-tac-toe#2.0.2":
   version "2.0.2"
   resolved "https://github.com/agte/bg-tic-tac-toe#a2705046d79f283f5b03af9e41c1bfbf7e2ca774"
@@ -3529,9 +3521,9 @@ xmlhttprequest-ssl@~1.5.4:
   integrity sha1-wodrBhaKrcQOV9l+gRkayPQ5iz4=
 
 y18n@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/y18n/-/y18n-4.0.0.tgz#95ef94f85ecc81d007c264e190a120f0a3c8566b"
-  integrity sha512-r9S/ZyXu/Xu9q1tYlpsLIsa3EeLXXk0VwlxqTcFRfg9EhMW+17kbt9G0NrgCmhGb5vT2hyhJZLfDGx+7+5Uj/w==
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/y18n/-/y18n-4.0.1.tgz#8db2b83c31c5d75099bb890b23f3094891e247d4"
+  integrity sha512-wNcy4NvjMYL8gogWWYAO7ZFWFfHcbdbE57tZO8e4cbpj8tfUcwrwqSl3ad8HxpYWCdXcJUCeKKZS62Av1affwQ==
 
 yallist@^2.1.2:
   version "2.1.2"
